@@ -1,0 +1,31 @@
+/* Add styles for P/A toggle buttons */
+.pa-toggle-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-success {
+    background-color: #28a745 !important;
+    border-color: #28a745 !important;
+    color: white !important;
+}
+
+.btn-danger {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+    color: white !important;
+}
+
+/* Fix for table row styling */
+.table-warning {
+    background-color: #fff3cd !important;
+}
+
+.table-secondary {
+    background-color: #e2e3e5 !important;
+} 

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Construction ERP | Foreman Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="css/manager.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Overlay for mobile -->
+    <div class="overlay" id="overlay"></div>
+    
+    <!-- Main App Container (flex layout with sidebar and content) -->
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <button class="hamburger" id="hamburgerBtn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="sidebar-header">
+                <div class="hindi-greeting">नमस्ते!</div>
+                <div class="hindi-name" id="foreman-name">राम राम</div>
+                <div class="language-switcher mt-3">
+                    <button class="btn btn-sm btn-outline-light" onclick="toggleLanguage()">
+                        <span class="current-lang">हिंदी</span>
+                        <i class="bi bi-translate ms-1"></i>
+                    </button>
+                </div>
+            </div>
+            <nav class="menu">
+                <a class="nav-link active" href="#overview" data-section="overview-section">
+                    <span class="nav-text">Home</span>
+                </a>
+                <a class="nav-link" href="#workers" data-section="workers-section">
+                    <span class="nav-text">श्रमिक जोड़ें</span>
+                </a>
+                <a class="nav-link" href="#attendance" data-section="attendance-section">
+                    <span class="nav-text">हाज़िरी</span>
+                </a>
+                <a class="nav-link" href="#reports" data-section="reports-section">
+                    <span class="nav-text">Reports</span>
+                </a>
+                <a class="nav-link" href="#profile" data-section="profile-section">
+                    <span class="nav-text">प्रोफ़ाइल</span>
+                </a>
+                <a class="logout-button" href="#" onclick="logout()">
+                    <span class="nav-text">लॉग आउट</span>
+                  </a>
+                  
+                  <style>
+                  .logout-button {
+                    display: inline-block;
+                    background-color: #dc3545; /* Bootstrap danger red */
+                    color: white;
+                    padding: 10px 16px;
+                    border-radius: 8px;
+                    text-decoration: none;
+                    font-weight: bold;
+                    transition: background-color 0.3s ease, transform 0.2s ease;
+                  }
+                  
+                  .logout-button:hover {
+                    background-color: #bb2d3b;
+                    transform: scale(1.05);
+                  }
+                  </style>
+                  
+            </nav>
+        </div>
+        
+        <!-- Main content -->
+        <div id="content-wrapper" class="content-wrapper">
+            <div class="container-fluid">
+                <!-- Overview Section -->
+                <div id="overview-section" class="section active">
+                    <h2 class="mb-4">Dashboard Overview</h2>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="stats-card border-primary">
+                                <h2 id="total-workers">0</h2>
+                                <p>कुल मजदूर</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stats-card border-warning">
+                                <h2 id="present-today">0</h2>
+                                <p>आज उपस्थित हैं</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="#attendance" class="attendance-btn" data-section="attendance-section" id="go-to-attendance">
+                                <i class="bi bi-calendar-check-fill"></i> हाज़िरी
+                            </a>
+                        </div>
+                    </div>
+                    
+                   
+                                    
+                                    
+                                        
+                    </div>
+                </div>
+
+                <!-- Workers Section -->
+                <div id="workers-section" class="section">
+                    <h2 class="mb-4">Workers</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <button class="btn btn-primary" onclick="showAddWorkerModal()">
+                                    <i class="bi bi-plus-circle"></i> Add Worker
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Father's Name</th>
+                                            <th>Phone</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="workers-table">
+                                        <!-- Workers will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attendance Section -->
+                <div id="attendance-section" class="section">
+                    <div class="section-header">
+                        <h2>Attendance Management</h2>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="date-picker-container">
+                                <input type="date" id="attendance-date" class="form-control" value="" onchange="loadAttendance()">
+                                <span id="attendance-day-display" class="attendance-day-display"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <!-- Removed save button from here -->
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-center">
+                            <h3 class="card-title">Attendance Records</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Sr.</th>
+                                            <th>Name</th>
+                                            <th>Father's Name</th>
+                                            <th>P/A</th>
+                                            <th>Hours</th>
+                                            <th class="text-center">Hajiri</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="attendance-table">
+                                        <tr>
+                                            <td colspan="7" class="text-center py-3">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
+                                                <p class="mt-2 mb-0">Loading attendance data...</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card-footer d-flex flex-column align-items-center">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="" id="attendance-confirm-checkbox" onchange="toggleAttendanceSubmitButton()">
+                                <label class="form-check-label" for="attendance-confirm-checkbox">
+                                    I confirm that this attendance record is complete and accurate. Submit to site incharge. (मैं पुष्टि करता हूँ कि यह उपस्थिति रिकॉर्ड सही है। साइट इंचार्ज को भेजें।)
+                                </label>
+                            </div>
+                            <button id="save-all-attendance" class="btn btn-primary" onclick="saveAllAttendance()">Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports Section -->
+                <div id="reports-section" class="section">
+                    <h2 class="mb-4">Reports</h2>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Monthly Attendance</h5>
+                                    <canvas id="attendance-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Site Performance</h5>
+                                    <canvas id="site-performance-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Section -->
+                <div id="profile-section" class="section">
+                    <h2 class="mb-4">Profile</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <form id="profile-form">
+                                <div class="mb-3">
+                                    <label class="form-label">Name</label>
+                                    <input type="text" class="form-control" id="profile-name">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Username</label>
+                                    <input type="text" class="form-control" id="profile-username">
+                                    <small class="text-muted">This is your login username. No @ symbol required.</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="profile-email" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Phone</label>
+                                    <input type="tel" class="form-control" id="profile-phone">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Update Profile</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add Worker Modal -->
+    <div class="modal fade" id="addWorkerModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Worker</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-worker-form">
+                        <div class="mb-3">
+                            <label class="form-label">Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="worker-name">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Father's Name</label>
+                            <input type="text" class="form-control" id="worker-father-name">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="worker-phone">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addWorker()">Add Worker</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Attendance Modal -->
+    <div class="modal fade" id="addAttendanceModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Mark Attendance</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-attendance-form">
+                        <div class="mb-3">
+                            <label class="form-label">Worker</label>
+                            <select class="form-select form-select-lg" id="attendance-worker" required>
+                                <!-- Workers will be loaded here -->
+                            </select>
+                        </div>
+                        <input type="hidden" id="add-attendance-site">
+                        <div class="mb-3">
+                            <label class="form-label">Date</label>
+                            <input type="date" class="form-control form-control-lg" id="add-attendance-date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <div class="d-flex gap-2">
+                                <div class="form-check flex-grow-1">
+                                    <input class="form-check-input" type="radio" name="status" id="status-present" value="present" checked>
+                                    <label class="form-check-label" for="status-present">
+                                        <span class="badge bg-success">Present</span>
+                                    </label>
+                                </div>
+                                <div class="form-check flex-grow-1">
+                                    <input class="form-check-input" type="radio" name="status" id="status-late" value="late">
+                                    <label class="form-check-label" for="status-late">
+                                        <span class="badge bg-warning">Late</span>
+                                    </label>
+                                </div>
+                                <div class="form-check flex-grow-1">
+                                    <input class="form-check-input" type="radio" name="status" id="status-absent" value="absent">
+                                    <label class="form-check-label" for="status-absent">
+                                        <span class="badge bg-danger">Absent</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">In Time</label>
+                                <input type="time" class="form-control form-control-lg" id="add-check-in-time">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Out Time</label>
+                                <input type="time" class="form-control form-control-lg" id="add-check-out-time" 
+                                    onchange="calculateWorkingHours('add-check-in-time', 'add-check-out-time', 'add-working-hours')">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Total Working Hours</label>
+                            <input type="text" class="form-control form-control-lg" id="add-working-hours" readonly>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="addAttendance()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Attendance Modal -->
+    <div class="modal fade" id="updateAttendanceModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update Attendance</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="update-attendance-form">
+                        <input type="hidden" id="attendance-id">
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <div class="d-flex gap-2">
+                                <div class="form-check flex-grow-1">
+                                    <input class="form-check-input" type="radio" name="update-status" id="update-status-present" value="present">
+                                    <label class="form-check-label" for="update-status-present">
+                                        <span class="badge bg-success">Present</span>
+                                    </label>
+                                </div>
+                                <div class="form-check flex-grow-1">
+                                    <input class="form-check-input" type="radio" name="update-status" id="update-status-late" value="late">
+                                    <label class="form-check-label" for="update-status-late">
+                                        <span class="badge bg-warning">Late</span>
+                                    </label>
+                                </div>
+                                <div class="form-check flex-grow-1">
+                                    <input class="form-check-input" type="radio" name="update-status" id="update-status-absent" value="absent">
+                                    <label class="form-check-label" for="update-status-absent">
+                                        <span class="badge bg-danger">Absent</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">In Time</label>
+                                <input type="time" class="form-control form-control-lg" id="check-in-time">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Out Time</label>
+                                <input type="time" class="form-control form-control-lg" id="check-out-time"
+                                    onchange="calculateWorkingHours('check-in-time', 'check-out-time', 'update-working-hours')">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Total Working Hours</label>
+                            <input type="text" class="form-control form-control-lg" id="update-working-hours" readonly>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="updateAttendance()">Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Worker Modal -->
+    <div class="modal fade" id="editWorkerModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Worker</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-worker-form">
+                        <input type="hidden" id="edit-worker-id">
+                        <div class="mb-3">
+                            <label class="form-label">Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="edit-worker-name">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Father's Name</label>
+                            <input type="text" class="form-control" id="edit-worker-father-name">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="edit-worker-phone">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger me-auto" onclick="deleteWorker()">Delete</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="updateWorker()">Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/sidebar.js"></script>
+    <script>
+    // Add this after your existing script tags
+    document.addEventListener('DOMContentLoaded', () => {
+        // Setup accessibility for all static modals
+        const staticModals = [
+            'addAttendanceModal',
+            'updateAttendanceModal',
+            'editWorkerModal'
+        ];
+        
+        staticModals.forEach(modalId => {
+            const modalElement = document.getElementById(modalId);
+            if (modalElement) {
+                setupModalAccessibility(modalElement);
+            }
+        });
+    });
+    </script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom Time Picker -->
+    <script src="/js/timepicker.js"></script>
+    <!-- Custom Time Picker -->
+    <script src="/js/custom-timepicker.js"></script>
+    <!-- Wheel Time Picker -->
+    <script src="/js/wheel-timepicker.js"></script>
+    <!-- Manager JS -->
+    <script src="/js/manager.js"></script>
+</body>
+</html> 

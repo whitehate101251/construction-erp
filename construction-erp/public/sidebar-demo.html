@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Construction ERP - Collapsible Sidebar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        /* Main Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            overflow-x: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Hamburger Icon */
+        .hamburger {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #343a40;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 1001;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .hamburger span {
+            position: relative;
+            width: 20px;
+            height: 2px;
+            background: #fff;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger span:before,
+        .hamburger span:after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 2px;
+            background: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger span:before {
+            transform: translateY(-6px);
+        }
+
+        .hamburger span:after {
+            transform: translateY(6px);
+        }
+
+        /* Transform hamburger to X */
+        .hamburger.active span {
+            background: transparent;
+        }
+
+        .hamburger.active span:before {
+            transform: rotate(45deg);
+        }
+
+        .hamburger.active span:after {
+            transform: rotate(-45deg);
+        }
+
+        /* Overlay for mobile */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: -250px;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background-color: #343a40;
+            color: white;
+            z-index: 1000;
+            overflow-y: auto;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        /* Collapsed sidebar */
+        .sidebar.collapsed {
+            width: 60px;
+            left: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background-color: #2c3136;
+            border-bottom: 1px solid #454d55;
+        }
+
+        .sidebar-header h3 {
+            color: #f8f9fa;
+            margin-bottom: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-header p {
+            color: #adb5bd;
+            margin-bottom: 0;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar.collapsed .sidebar-header h3,
+        .sidebar.collapsed .sidebar-header p {
+            display: none;
+        }
+
+        /* Navigation */
+        .nav-link {
+            padding: 12px 20px;
+            color: #adb5bd;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: #454d55;
+            color: white;
+        }
+
+        .nav-link i {
+            font-size: 1.1rem;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .sidebar.collapsed .nav-text {
+            display: none;
+        }
+
+        .sidebar.collapsed .nav-link {
+            padding: 12px 0;
+            justify-content: center;
+        }
+
+        /* Main Content */
+        .content-wrapper {
+            padding: 20px;
+            transition: all 0.3s ease;
+            margin-left: 0;
+            margin-top: 60px;
+        }
+
+        .sidebar.active ~ .content-wrapper {
+            margin-left: 250px;
+        }
+
+        .sidebar.collapsed ~ .content-wrapper {
+            margin-left: 60px;
+        }
+
+        /* Content Sections */
+        .section {
+            display: none;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.05);
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 992px) {
+            .sidebar.active ~ .content-wrapper,
+            .sidebar.collapsed ~ .content-wrapper {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hamburger menu -->
+    <div class="hamburger" id="hamburger-toggle">
+        <span></span>
+    </div>
+    
+    <!-- Overlay for mobile -->
+    <div class="overlay" id="overlay"></div>
+    
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Construction ERP</h3>
+            <p>Sidebar Demo</p>
+        </div>
+        <nav>
+            <a class="nav-link active" href="#dashboard" data-section="dashboard-section">
+                <i class="bi bi-grid-1x2-fill"></i> <span class="nav-text">Dashboard</span>
+            </a>
+            <a class="nav-link" href="#projects" data-section="projects-section">
+                <i class="bi bi-building-fill"></i> <span class="nav-text">Projects</span>
+            </a>
+            <a class="nav-link" href="#workers" data-section="workers-section">
+                <i class="bi bi-people-fill"></i> <span class="nav-text">Workers</span>
+            </a>
+            <a class="nav-link" href="#reports" data-section="reports-section">
+                <i class="bi bi-bar-chart-fill"></i> <span class="nav-text">Reports</span>
+            </a>
+            <a class="nav-link" href="#settings" data-section="settings-section">
+                <i class="bi bi-gear-fill"></i> <span class="nav-text">Settings</span>
+            </a>
+        </nav>
+    </div>
+    
+    <!-- Main content -->
+    <div id="content-wrapper" class="content-wrapper">
+        <div class="container-fluid">
+            <div id="dashboard-section" class="section active">
+                <h2>Dashboard</h2>
+                <p>This is a demonstration of a collapsible sidebar.</p>
+                <p>You can click the hamburger menu to toggle between expanded, collapsed, and hidden states.</p>
+                <p>On desktop, the sidebar will collapse to icons. On mobile, it will slide in when needed.</p>
+            </div>
+            
+            <div id="projects-section" class="section">
+                <h2>Projects</h2>
+                <p>This would contain a list of construction projects.</p>
+            </div>
+            
+            <div id="workers-section" class="section">
+                <h2>Workers</h2>
+                <p>This would display workers management interface.</p>
+            </div>
+            
+            <div id="reports-section" class="section">
+                <h2>Reports</h2>
+                <p>This would show various reports and analytics.</p>
+            </div>
+            
+            <div id="settings-section" class="section">
+                <h2>Settings</h2>
+                <p>This would contain application settings.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const hamburger = document.getElementById('hamburger-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentWrapper = document.getElementById('content-wrapper');
+            
+            // Initialize from saved state
+            initSidebarState();
+            
+            // Handle URL hash for direct section navigation
+            handleHashNavigation();
+            
+            // Toggle sidebar on hamburger click
+            hamburger.addEventListener('click', function() {
+                if (sidebar.classList.contains('active')) {
+                    // If sidebar is open, collapse it
+                    sidebar.classList.remove('active');
+                    sidebar.classList.add('collapsed');
+                    hamburger.classList.remove('active');
+                    overlay.classList.remove('active');
+                } else if (sidebar.classList.contains('collapsed')) {
+                    // If sidebar is collapsed, expand it
+                    sidebar.classList.remove('collapsed');
+                    sidebar.classList.add('active');
+                    hamburger.classList.add('active');
+                    overlay.classList.add('active');
+                } else {
+                    // If sidebar is hidden, show it collapsed on mobile, expanded on desktop
+                    if (window.innerWidth < 992) {
+                        sidebar.classList.add('active');
+                        hamburger.classList.add('active');
+                        overlay.classList.add('active');
+                    } else {
+                        sidebar.classList.add('collapsed');
+                        hamburger.classList.remove('active');
+                    }
+                }
+                
+                // Save sidebar state
+                saveSidebarState();
+            });
+            
+            // Close sidebar when clicking overlay
+            overlay.addEventListener('click', function() {
+                sidebar.classList.remove('active');
+                hamburger.classList.remove('active');
+                overlay.classList.remove('active');
+                
+                // On desktop, collapse instead of fully closing
+                if (window.innerWidth >= 992) {
+                    sidebar.classList.add('collapsed');
+                }
+                
+                // Save sidebar state
+                saveSidebarState();
+            });
+            
+            // Navigation functionality
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const href = this.getAttribute('href');
+                    if (href === '#') return;
+                    
+                    // Update URL hash
+                    window.location.hash = href.substring(1);
+                    
+                    // Navigate to section
+                    navigateToSection(this.getAttribute('data-section'));
+                    
+                    // Handle sidebar on mobile
+                    if (window.innerWidth < 992) {
+                        sidebar.classList.remove('active');
+                        hamburger.classList.remove('active');
+                        overlay.classList.remove('active');
+                    }
+                });
+            });
+            
+            // Handle hash changes (browser back/forward)
+            window.addEventListener('hashchange', function() {
+                handleHashNavigation();
+            });
+            
+            // Responsive behavior
+            window.addEventListener('resize', function() {
+                if (window.innerWidth < 992) {
+                    if (sidebar.classList.contains('collapsed')) {
+                        sidebar.classList.remove('collapsed');
+                    }
+                }
+            });
+            
+            // Save sidebar state to localStorage
+            function saveSidebarState() {
+                const state = {
+                    active: sidebar.classList.contains('active'),
+                    collapsed: sidebar.classList.contains('collapsed')
+                };
+                localStorage.setItem('sidebarState', JSON.stringify(state));
+            }
+            
+            // Initialize sidebar from saved state
+            function initSidebarState() {
+                const savedState = localStorage.getItem('sidebarState');
+                
+                if (savedState) {
+                    const state = JSON.parse(savedState);
+                    
+                    // On mobile, always start closed
+                    if (window.innerWidth < 992) {
+                        sidebar.classList.remove('active', 'collapsed');
+                        return;
+                    }
+                    
+                    // On desktop, apply saved state
+                    if (state.active) {
+                        sidebar.classList.add('active');
+                        hamburger.classList.add('active');
+                    } else if (state.collapsed) {
+                        sidebar.classList.add('collapsed');
+                    }
+                } else {
+                    // Default state - collapsed on desktop, hidden on mobile
+                    if (window.innerWidth >= 992) {
+                        sidebar.classList.add('collapsed');
+                    }
+                }
+            }
+            
+            // Handle navigation based on URL hash
+            function handleHashNavigation() {
+                const hash = window.location.hash.substring(1);
+                
+                if (hash) {
+                    const section = document.querySelector(`.nav-link[href="#${hash}"]`);
+                    if (section) {
+                        navigateToSection(section.getAttribute('data-section'));
+                        
+                        // Update active class
+                        navLinks.forEach(link => link.classList.remove('active'));
+                        section.classList.add('active');
+                    }
+                }
+            }
+            
+            // Navigate to a specific section
+            function navigateToSection(sectionId) {
+                // Remove active class from all nav links
+                navLinks.forEach(link => {
+                    if (link.getAttribute('data-section') === sectionId) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+                
+                // Hide all sections
+                document.querySelectorAll('.section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                // Show the selected section
+                const targetSection = document.getElementById(sectionId);
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

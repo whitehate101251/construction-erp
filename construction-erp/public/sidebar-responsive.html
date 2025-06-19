@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clean Collapsible Sidebar</title>
+    <style>
+        /* Base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        body {
+            background-color: #f7f7f8;
+            overflow-x: hidden;
+        }
+        
+        /* Hamburger button - clean white with black lines */
+        .hamburger {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            width: 40px;
+            height: 40px;
+            border-radius: 5px;
+            background: #ffffff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        
+        .hamburger:hover {
+            background: #f5f5f5;
+        }
+        
+        .hamburger__line {
+            width: 20px;
+            height: 2px;
+            background: #333;
+            margin: 2px 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        
+        /* Transform to X */
+        .hamburger.active .hamburger__line:nth-child(1) {
+            transform: translateY(6px) rotate(45deg);
+        }
+        
+        .hamburger.active .hamburger__line:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .hamburger.active .hamburger__line:nth-child(3) {
+            transform: translateY(-6px) rotate(-45deg);
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 260px;
+            background: #343a40;
+            color: #ffffff;
+            z-index: 999;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+        
+        .sidebar.active {
+            transform: translateX(0);
+        }
+        
+        /* Sidebar header */
+        .sidebar-header {
+            padding: 20px;
+            background-color: #2c3136;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar-header h3 {
+            color: #f8f9fa;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .sidebar-header .welcome-text {
+            color: #ffc107;
+            font-weight: 600;
+        }
+        
+        .sidebar-header p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        /* Navigation */
+        .nav-items {
+            padding: 10px;
+        }
+        
+        .nav-item {
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.2s ease;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+        
+        .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+        
+        .nav-item i {
+            margin-right: 15px;
+            font-size: 18px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .logout-button {
+            color: #dc3545;
+        }
+        
+        /* Main content */
+        .main-content {
+            transition: padding-left 0.3s ease;
+            padding: 20px;
+            padding-top: 70px;
+        }
+        
+        .sidebar.active ~ .main-content {
+            padding-left: 280px;
+        }
+        
+        /* Overlay for mobile */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 998;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .overlay.active {
+            display: block;
+            opacity: 1;
+        }
+        
+        /* Content cards */
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar.active ~ .main-content {
+                padding-left: 20px;
+            }
+            
+            .sidebar {
+                width: 260px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Clean hamburger menu - white with black lines -->
+    <div class="hamburger" id="hamburger">
+        <div class="hamburger__line"></div>
+        <div class="hamburger__line"></div>
+        <div class="hamburger__line"></div>
+    </div>
+    
+    <!-- Overlay for mobile -->
+    <div class="overlay" id="overlay"></div>
+    
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div>
+                <h3>Welcome, <span class="welcome-text">ramram!</span></h3>
+                <p>Manage your site efficiently</p>
+            </div>
+        </div>
+        
+        <div class="nav-items">
+            <div class="nav-item active">
+                <i class="icon">📊</i>
+                <span>Overview</span>
+            </div>
+            <div class="nav-item">
+                <i class="icon">👥</i>
+                <span>Workers</span>
+            </div>
+            <div class="nav-item">
+                <i class="icon">📅</i>
+                <span>Attendance</span>
+            </div>
+            <div class="nav-item">
+                <i class="icon">📈</i>
+                <span>Reports</span>
+            </div>
+            <div class="nav-item">
+                <i class="icon">👤</i>
+                <span>Profile</span>
+            </div>
+            <div class="nav-item logout-button">
+                <i class="icon">🚪</i>
+                <span>Logout</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main content -->
+    <div class="main-content" id="main-content">
+        <div class="card">
+            <h2 class="card-title">Dashboard Overview</h2>
+            <div class="row">
+                <div class="stat">
+                    <h3>0</h3>
+                    <p>Total Workers</p>
+                </div>
+                <div class="stat">
+                    <h3>0</h3>
+                    <p>Active Sites</p>
+                </div>
+                <div class="stat">
+                    <h3>0</h3>
+                    <p>Present Today</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title">My Sites</h2>
+            <p>Here you can see all the sites you are managing.</p>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title">Recent Activity</h2>
+            <p>No recent activity to display.</p>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const hamburger = document.getElementById('hamburger');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            const mainContent = document.getElementById('main-content');
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            // Check if mobile view
+            const isMobile = () => window.innerWidth <= 768;
+            
+            // Toggle sidebar
+            hamburger.addEventListener('click', function() {
+                this.classList.toggle('active');
+                sidebar.classList.toggle('active');
+                
+                // On mobile, show overlay
+                if (isMobile()) {
+                    overlay.classList.toggle('active');
+                }
+            });
+            
+            // Close sidebar when clicking overlay (mobile only)
+            overlay.addEventListener('click', function() {
+                hamburger.classList.remove('active');
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+            
+            // Handle nav item clicks
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Remove active class from all items
+                    navItems.forEach(i => i.classList.remove('active'));
+                    
+                    // Add active class to clicked item
+                    this.classList.add('active');
+                    
+                    // On mobile, close the sidebar after navigation
+                    if (isMobile()) {
+                        hamburger.classList.remove('active');
+                        sidebar.classList.remove('active');
+                        overlay.classList.remove('active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

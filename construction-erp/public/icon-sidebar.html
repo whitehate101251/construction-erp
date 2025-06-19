@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Construction ERP - Sidebar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-bg: #2d3339;
+            --sidebar-width: 260px;
+            --sidebar-collapsed-width: 60px;
+            --sidebar-accent: #ffc107;
+            --text-light: rgba(255, 255, 255, 0.9);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --content-bg: #f5f5f5;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        body {
+            background-color: var(--content-bg);
+            overflow-x: hidden;
+        }
+        
+        /* Sidebar styling */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            background: var(--sidebar-bg);
+            color: var(--text-light);
+            transition: width 0.3s ease, transform 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Icon-only mode */
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+        
+        /* Full sidebar mode */
+        .sidebar.expanded {
+            width: var(--sidebar-width);
+        }
+        
+        /* Yellow accent bar */
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--sidebar-accent);
+        }
+        
+        /* Header section */
+        .sidebar-header {
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar-header h3 {
+            font-size: 18px;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .sidebar-header p {
+            font-size: 14px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .sidebar.collapsed .sidebar-header h3,
+        .sidebar.collapsed .sidebar-header p {
+            display: none;
+        }
+        
+        /* Navigation menu */
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+        }
+        
+        .nav-item {
+            position: relative;
+            transition: background 0.2s ease;
+        }
+        
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--sidebar-accent);
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-light);
+            padding: 14px 20px;
+            transition: background 0.2s ease;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .nav-icon {
+            font-size: 20px;
+            min-width: 24px;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .nav-text {
+            margin-left: 12px;
+            white-space: nowrap;
+            opacity: 1;
+            transition: opacity 0.2s ease;
+        }
+        
+        .sidebar.collapsed .nav-text {
+            opacity: 0;
+            display: none;
+        }
+        
+        /* Logout button styling */
+        .logout {
+            color: #dc3545;
+        }
+        
+        /* Content area */
+        .content {
+            transition: margin-left 0.3s ease;
+            padding: 20px;
+        }
+        
+        .content.sidebar-expanded {
+            margin-left: var(--sidebar-width);
+        }
+        
+        .content.sidebar-collapsed {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+        
+        /* Hamburger menu */
+        .hamburger {
+            position: fixed;
+            top: 14px;
+            left: 12px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 1001;
+            border-radius: 4px;
+            background: var(--sidebar-bg);
+        }
+        
+        .hamburger:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .hamburger-line {
+            width: 20px;
+            height: 2px;
+            background: white;
+            margin: 2px 0;
+            transition: all 0.3s ease;
+        }
+        
+        /* Content styling */
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid #007bff;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .stats-number {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stats-label {
+            color: #6c757d;
+        }
+        
+        /* Responsive behavior */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
+            
+            .sidebar.expanded {
+                transform: translateX(0);
+            }
+            
+            .content.sidebar-expanded,
+            .content.sidebar-collapsed {
+                margin-left: 0;
+            }
+            
+            .overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+                display: none;
+            }
+            
+            .overlay.active {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hamburger menu -->
+    <div class="hamburger" id="hamburger">
+        <div class="hamburger-line"></div>
+        <div class="hamburger-line"></div>
+        <div class="hamburger-line"></div>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="sidebar collapsed" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Welcome, <span style="color: var(--sidebar-accent);">ramram!</span></h3>
+            <p>Manage your site efficiently</p>
+        </div>
+        
+        <ul class="nav-menu">
+            <li class="nav-item active">
+                <a href="#overview" class="nav-link">
+                    <span class="nav-icon"><i class="bi bi-grid-1x2-fill"></i></span>
+                    <span class="nav-text">Overview</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#workers" class="nav-link">
+                    <span class="nav-icon"><i class="bi bi-people-fill"></i></span>
+                    <span class="nav-text">Workers</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#attendance" class="nav-link">
+                    <span class="nav-icon"><i class="bi bi-calendar-check-fill"></i></span>
+                    <span class="nav-text">Attendance</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#reports" class="nav-link">
+                    <span class="nav-icon"><i class="bi bi-bar-chart-fill"></i></span>
+                    <span class="nav-text">Reports</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#profile" class="nav-link">
+                    <span class="nav-icon"><i class="bi bi-person-fill"></i></span>
+                    <span class="nav-text">Profile</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#logout" class="nav-link logout">
+                    <span class="nav-icon"><i class="bi bi-box-arrow-right"></i></span>
+                    <span class="nav-text">Logout</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    
+    <!-- Overlay for mobile view -->
+    <div class="overlay" id="overlay"></div>
+    
+    <!-- Main content -->
+    <div class="content sidebar-collapsed" id="content">
+        <h1>Dashboard Overview</h1>
+        
+        <div class="row">
+            <div class="stats-card">
+                <div class="stats-number">42</div>
+                <div class="stats-label">Total Workers</div>
+            </div>
+            
+            <div class="stats-card" style="border-left-color: #28a745;">
+                <div class="stats-number">7</div>
+                <div class="stats-label">Active Sites</div>
+            </div>
+            
+            <div class="stats-card" style="border-left-color: #ffc107;">
+                <div class="stats-number">38</div>
+                <div class="stats-label">Present Today</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>My Sites</h2>
+            <p>Your site management dashboard will appear here.</p>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const hamburger = document.getElementById('hamburger');
+            const sidebar = document.getElementById('sidebar');
+            const content = document.getElementById('content');
+            const overlay = document.getElementById('overlay');
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            // Check if mobile view
+            const isMobile = () => window.innerWidth <= 768;
+            
+            // Toggle sidebar state
+            function toggleSidebar() {
+                const isExpanded = sidebar.classList.contains('expanded');
+                
+                // Toggle classes based on sidebar state
+                if (isExpanded) {
+                    // Collapse sidebar
+                    sidebar.classList.remove('expanded');
+                    sidebar.classList.add('collapsed');
+                    content.classList.remove('sidebar-expanded');
+                    content.classList.add('sidebar-collapsed');
+                } else {
+                    // Expand sidebar
+                    sidebar.classList.remove('collapsed');
+                    sidebar.classList.add('expanded');
+                    content.classList.remove('sidebar-collapsed');
+                    content.classList.add('sidebar-expanded');
+                }
+                
+                // Handle overlay for mobile view
+                if (isMobile()) {
+                    if (sidebar.classList.contains('expanded')) {
+                        overlay.classList.add('active');
+                    } else {
+                        overlay.classList.remove('active');
+                    }
+                }
+                
+                // Save sidebar state
+                localStorage.setItem('sidebarState', sidebar.classList.contains('expanded') ? 'expanded' : 'collapsed');
+            }
+            
+            // Handle hamburger click
+            hamburger.addEventListener('click', toggleSidebar);
+            
+            // Handle overlay click to close sidebar on mobile
+            overlay.addEventListener('click', function() {
+                if (sidebar.classList.contains('expanded')) {
+                    toggleSidebar();
+                }
+            });
+            
+            // Handle navigation item clicks
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Set active class
+                    navItems.forEach(el => el.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Close sidebar on mobile after navigation
+                    if (isMobile() && sidebar.classList.contains('expanded')) {
+                        toggleSidebar();
+                    }
+                });
+            });
+            
+            // Initialize sidebar state from localStorage
+            function initSidebar() {
+                const savedState = localStorage.getItem('sidebarState');
+                
+                if (isMobile()) {
+                    // On mobile, always start with sidebar closed
+                    sidebar.classList.remove('expanded');
+                    sidebar.classList.add('collapsed');
+                    content.classList.remove('sidebar-expanded');
+                    content.classList.add('sidebar-collapsed');
+                    overlay.classList.remove('active');
+                } else {
+                    // On desktop, respect saved preference
+                    if (savedState === 'expanded') {
+                        sidebar.classList.remove('collapsed');
+                        sidebar.classList.add('expanded');
+                        content.classList.remove('sidebar-collapsed');
+                        content.classList.add('sidebar-expanded');
+                    } else {
+                        sidebar.classList.remove('expanded');
+                        sidebar.classList.add('collapsed');
+                        content.classList.remove('sidebar-expanded');
+                        content.classList.add('sidebar-collapsed');
+                    }
+                }
+            }
+            
+            // Initialize on load
+            initSidebar();
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                initSidebar();
+            });
+        });
+    </script>
+</body>
+</html> 

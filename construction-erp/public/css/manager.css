@@ -1,0 +1,983 @@
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    height: 100%;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f5f7fa;
+    overflow-x: hidden;
+}
+
+/* Layout */
+.app-container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    position: relative;
+}
+
+.content-wrapper {
+    flex: 1;
+    padding: 25px;
+    padding-top: 70px;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    margin-left: 0;
+    position: relative;
+    overflow-y: auto;
+    height: 100vh;
+}
+
+.content-wrapper::before {
+    content: '';
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    background-color: rgba(245, 247, 250, 0.95);
+    z-index: 1000;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    background-color: #2c2f36;
+    color: white;
+    overflow-y: auto;
+    transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    flex-shrink: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 20px 10px;
+    display: flex;
+    flex-direction: column;
+    z-index: 1001;
+}
+
+.sidebar.collapsed {
+    width: 80px;
+}
+
+/* Adjust content wrapper margin when sidebar is present */
+.sidebar:not(.collapsed) + .content-wrapper {
+    margin-left: 250px;
+}
+
+.sidebar.collapsed + .content-wrapper {
+    margin-left: 80px;
+}
+
+.sidebar-header {
+    padding: 20px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 20px;
+}
+
+.sidebar-header h3 {
+    color: #f8f9fa;
+    margin-bottom: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 1.2rem;
+    font-weight: 500;
+    display: none;
+}
+
+/* Cross button in top right */
+.close-sidebar {
+    display: none;
+}
+
+.hindi-greeting {
+    font-size: 1.5rem;
+    color: #ffc107;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.hindi-name {
+    font-size: 1.2rem;
+    color: #ffc107;
+    margin-bottom: 10px;
+    font-weight: 500;
+    display: block;
+}
+
+.sidebar-header p {
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 0;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: none;
+}
+
+nav.menu {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.nav-link {
+    display: block;
+    color: white;
+    padding: 15px;
+    text-decoration: none;
+    font-size: 16px;
+    transition: 0.2s;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nav-link .nav-text {
+    display: inline-block;
+    color: white;
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    background: #40434a;
+}
+
+.nav-link.active {
+    background-color: #40434a;
+    color: white;
+}
+
+.nav-link i {
+    font-size: 1.1rem;
+    margin-right: 12px;
+    width: 20px;
+    text-align: center;
+}
+
+.nav-link.text-danger {
+    color: #f44336;
+}
+
+/* Hamburger Menu */
+.hamburger {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 24px;
+    width: 30px;
+    margin-bottom: 20px;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.hamburger span {
+    background: #000;
+    height: 3px;
+    width: 100%;
+    border-radius: 2px;
+    transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.hamburger.open span {
+    background: #fff;
+}
+
+.hamburger.open span:nth-child(1) {
+    transform: rotate(45deg) translate(8px, 8px);
+}
+
+.hamburger.open span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger.open span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* Sections */
+.section {
+    display: none;
+    padding-top: 10px;
+}
+
+.section.active {
+    display: block;
+}
+
+/* Cards and other styles */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
+    background: white;
+}
+
+.card-body {
+    padding: 25px;
+}
+
+.stats-card {
+    border-left: 4px solid;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.stats-card h2 {
+    font-size: 2.5rem;
+    margin-bottom: 5px;
+}
+
+.stats-card p {
+    color: #6c757d;
+    margin-bottom: 0;
+}
+
+.border-primary {
+    border-left-color: #007bff;
+}
+
+.border-success {
+    border-left-color: #28a745;
+}
+
+.border-warning {
+    border-left-color: #ffc107;
+}
+
+/* Attendance button styling */
+.attendance-btn {
+    display: block;
+    background: #007bff;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    text-align: center;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    margin-top: 20px;
+    font-size: 1.2rem;
+}
+
+.attendance-btn:hover {
+    background: #0069d9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    color: white;
+    text-decoration: none;
+}
+
+.attendance-btn i {
+    margin-right: 8px;
+}
+
+.table th, .table td {
+    padding: 0.75rem;
+    vertical-align: middle;
+}
+
+/* Make attendance table wider */
+#attendance-section .card {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+#attendance-table {
+    min-width: 700px; /* Ensure minimum width for better spacing */
+}
+
+#attendance-table td:nth-child(1), /* Name column */
+#attendance-table th:nth-child(1) {
+    width: 25%;
+}
+
+#attendance-table td:nth-child(2), /* Father's name column */
+#attendance-table th:nth-child(2) {
+    width: 25%;
+}
+
+#attendance-table td:nth-child(3), /* In time column */
+#attendance-table th:nth-child(3) {
+    width: 20%;
+}
+
+#attendance-table td:nth-child(4), /* Out time column */
+#attendance-table th:nth-child(4) {
+    width: 20%;
+}
+
+#attendance-table td:nth-child(5), /* Working hours column */
+#attendance-table th:nth-child(5) {
+    width: 10%;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .app-container {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        position: fixed;
+        left: -250px;
+        z-index: 1001;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.15);
+        padding-top: 60px;
+    }
+    
+    .sidebar.active {
+        left: 0;
+    }
+    
+    .content-wrapper {
+        padding: 15px;
+        padding-top: 65px;
+        margin-left: 0 !important;
+    }
+    
+    .content-wrapper::before {
+        height: 50px;
+    }
+    
+    .hamburger {
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        margin: 0;
+        z-index: 1050;
+    }
+    
+    .hamburger span {
+        background: #000;
+    }
+    
+    .hamburger.open span {
+        background: #fff;
+    }
+    
+    .section h2 {
+        margin-top: 10px;
+    }
+    
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        z-index: 1000;
+        display: none;
+        opacity: 0;
+        transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .overlay.active {
+        display: block;
+        opacity: 1;
+    }
+    
+    .table th, .table td {
+        padding: 0.5rem;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .stats-card h2 {
+        font-size: 2rem;
+    }
+}
+
+/* Adjustments for collapsed sidebar */
+.sidebar.collapsed .sidebar-header h3,
+.sidebar.collapsed .sidebar-header p,
+.sidebar.collapsed .hindi-greeting {
+    display: none;
+}
+
+.sidebar.collapsed .nav-text {
+    display: none;
+}
+
+.sidebar.collapsed .nav-link {
+    padding: 15px 0;
+    justify-content: center;
+    text-align: center;
+}
+
+.sidebar.collapsed .nav-link i {
+    margin-right: 0;
+    font-size: 20px;
+}
+
+/* Add styles for section headings to ensure they're below the menu */
+.section h2 {
+    margin-top: 10px;
+    position: relative;
+    z-index: 2;
+}
+
+/* Toast notifications */
+.toast-container {
+    z-index: 1100;
+}
+
+/* Ensure modals are above everything */
+.modal {
+    z-index: 1100;
+}
+
+/* Ensure dropdowns are above content */
+.dropdown-menu {
+    z-index: 1000;
+}
+
+/* Ensure tooltips are above content */
+.tooltip {
+    z-index: 1100;
+}
+
+/* Custom styles for time inputs */
+.time-input-group {
+    cursor: pointer;
+}
+
+.time-input-group .input-group-text {
+    background-color: #f8f9fa;
+    border-left: none;
+    min-width: 90px; /* To accommodate the 12-hour format */
+    display: flex;
+    justify-content: space-between;
+}
+
+.time-display {
+    font-size: 0.85rem;
+    font-weight: normal;
+    color: #6c757d;
+}
+
+.time-input-group:hover {
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.time-input-group input[type="time"]::-webkit-calendar-picker-indicator {
+    display: none;
+}
+
+/* Style the time inputs to show 12-hour format */
+input[type="time"] {
+    position: relative;
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 0.75rem;
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    color: #495057;
+    font-size: 16px;
+    width: 110px; /* Increased from 100% to fixed width */
+    min-height: 46px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+/* Use the placeholder to show 12-hour format */
+input[type="time"]::placeholder {
+    color: #495057;
+    opacity: 1;
+}
+
+/* Create a custom display for time inputs */
+input[type="time"]::after {
+    content: attr(data-display);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0.75rem;
+    background-color: transparent;
+    pointer-events: none;
+    font-size: 16px;
+    text-align: center;
+    white-space: nowrap; /* Prevent wrapping of AM/PM */
+}
+
+/* Show placeholder when empty */
+input[type="time"]:not([data-display])::after {
+    content: "--:-- --";
+}
+
+/* Add hint about double-click */
+input[type="time"]:not(:focus)::before {
+    content: "Double-click to type";
+    position: absolute;
+    bottom: -22px;
+    left: 0;
+    width: 100%;
+    font-size: 10px;
+    color: #6c757d;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    text-align: center;
+    pointer-events: none;
+}
+
+input[type="time"]:hover::before {
+    opacity: 1;
+}
+
+input[type="time"]:hover {
+    background-color: #e9ecef;
+}
+
+input[type="time"]:focus {
+    outline: none;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Hide the default time picker arrow and text */
+input[type="time"]::-webkit-calendar-picker-indicator {
+    display: none;
+}
+
+input[type="time"]::-webkit-datetime-edit {
+    opacity: 0;
+}
+
+input[type="time"]::-webkit-datetime-edit-fields-wrapper {
+    opacity: 0;
+}
+
+/* Style the time input when it's being modified */
+tr.table-warning input[type="time"] {
+    background-color: #fff8e1;
+    border-color: #ffca28;
+}
+
+/* Style for time wheel selectors */
+.time-wheel {
+    scroll-behavior: smooth;
+    text-align: center;
+    padding: 80px 0;  /* Add padding to show effect of options above/below */
+}
+
+.time-wheel option {
+    padding: 10px 5px;
+    transition: all 0.2s ease;
+    font-size: 1.2rem;
+    border: none;
+    background: transparent;
+    margin: 5px 0;
+}
+
+.time-wheel option:checked {
+    font-weight: bold;
+    font-size: 1.4rem;
+}
+
+/* Custom scrollbar for time wheels */
+.time-wheel::-webkit-scrollbar {
+    width: 5px;
+}
+
+.time-wheel::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.time-wheel::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.time-wheel::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Add a highlight effect for the time picker wheel */
+.time-wheel::before,
+.time-wheel::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.time-wheel::before {
+    top: 0;
+    height: 80px;
+    background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
+}
+
+.time-wheel::after {
+    bottom: 0;
+    height: 80px;
+    background: linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
+}
+
+/* Style the time picker modal */
+#custom-time-picker-modal .modal-dialog {
+    max-width: 500px;
+}
+
+#custom-time-picker-modal .modal-content {
+    border-radius: 12px;
+}
+
+#custom-time-picker-modal .modal-body {
+    padding: 20px 30px;
+}
+
+#custom-time-picker-modal .form-label {
+    font-weight: 500;
+    text-align: center;
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+#custom-time-picker-modal .modal-footer {
+    padding: 15px 30px;
+    justify-content: space-between;
+}
+
+#custom-time-picker-modal .btn-primary {
+    min-width: 120px;
+    font-size: 1.1rem;
+    padding: 10px 15px;
+}
+
+#custom-time-picker-modal .btn-secondary {
+    min-width: 120px;
+    font-size: 1.1rem;
+    padding: 10px 15px;
+}
+
+/* New time wheel styles for infinite scrolling */
+.wheel-container {
+    position: relative;
+    height: 180px; /* Adjusted to show 4 items */
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    margin-bottom: 15px;
+}
+
+.time-wheel-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 2;
+    border-radius: 10px;
+    /* Simplified gradient for better performance */
+    background: linear-gradient(to bottom, 
+        rgba(255,255,255,1) 0%, 
+        rgba(255,255,255,0) 25%,
+        rgba(255,255,255,0) 75%,
+        rgba(255,255,255,1) 100%
+    );
+    /* Highlight selected item */
+    background-image: linear-gradient(to bottom,
+        transparent,
+        transparent 42%,
+        rgba(0, 123, 255, 0.1) 47%,
+        rgba(0, 123, 255, 0.1) 53%,
+        transparent 58%,
+        transparent
+    );
+}
+
+.time-wheel-infinite {
+    height: 100%;
+    overflow-y: auto;
+    padding: 60px 0; /* Adjusted padding to show 4 items */
+    scrollbar-width: none; /* Hide scrollbar for Firefox */
+    -ms-overflow-style: none; /* Hide scrollbar for IE and Edge */
+    position: relative;
+    text-align: center;
+}
+
+/* Hide webkit scrollbar */
+.time-wheel-infinite::-webkit-scrollbar {
+    display: none;
+}
+
+.wheel-item {
+    padding: 10px 0;
+    font-size: 16px;
+    transition: transform 0.1s ease, opacity 0.1s ease;
+    cursor: pointer;
+    user-select: none;
+    height: 45px; /* Fixed height for consistent wheel items */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wheel-spacer {
+    height: 45px; /* Match the height of wheel-item */
+}
+
+.wheel-item.selected {
+    font-weight: bold;
+    font-size: 20px;
+    color: #007bff;
+}
+
+/* Optimize time picker modal */
+#custom-time-picker-modal .modal-dialog {
+    max-width: 360px;
+    margin-top: 10vh;
+}
+
+#custom-time-picker-modal .modal-content {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+#custom-time-picker-modal .modal-body {
+    padding: 5px 15px 20px 15px;
+}
+
+#custom-time-picker-modal .form-label {
+    font-weight: 600;
+    text-align: center;
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+#custom-time-picker-modal .modal-footer {
+    padding: 10px 15px;
+    border-top: 1px solid #eee;
+}
+
+/* Style picker buttons */
+#custom-time-picker-modal .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    padding: 6px 16px;
+    font-weight: 500;
+    border-radius: 8px;
+    min-width: 60px;
+}
+
+#custom-time-picker-modal .btn-secondary {
+    background-color: #f5f5f5;
+    border-color: #f5f5f5;
+    color: #333;
+    padding: 6px 16px;
+    font-weight: 500;
+    border-radius: 8px;
+    min-width: 60px;
+}
+
+/* Hide the default time picker arrow and text */
+input[type="time"]::-webkit-calendar-picker-indicator {
+    display: none;
+}
+
+input[type="time"]::-webkit-datetime-edit {
+    opacity: 0;
+}
+
+input[type="time"]::-webkit-datetime-edit-fields-wrapper {
+    opacity: 0;
+}
+
+/* Hajiri column styles */
+.hajiri-column {
+    min-width: 120px;
+}
+
+.hajiri-container {
+    align-items: center;
+}
+
+.hajiri-pa-container {
+    width: 50px;
+}
+
+.hajiri-num-container {
+    width: 50px;
+}
+
+.hajiri-pa {
+    font-weight: bold;
+    text-align: center;
+}
+
+.hajiri-num {
+    cursor: pointer;
+    font-weight: bold;
+    height: 38px;
+}
+
+/* Number wheel modal styles */
+.number-wheel {
+    height: 180px;
+    padding: 70px 0;
+    overflow-y: scroll;
+    text-align: center;
+    scroll-snap-type: y mandatory;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.number-wheel::-webkit-scrollbar {
+    display: none;
+}
+
+/* Wheel item styles for number wheel */
+.number-wheel .wheel-item {
+    height: 40px;
+    font-size: 22px;
+    line-height: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    scroll-snap-align: center;
+}
+
+/* Increase the size of time picker elements */
+.worker-name-display {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 15px !important;
+}
+
+.modal-header .modal-title {
+    font-weight: bold;
+    color: #3a3a3a;
+}
+
+/* Customized buttons in the modal footer */
+.modal-footer .btn-primary {
+    min-width: 90px;
+}
+
+.modal-footer .btn-success {
+    min-width: 90px;
+}
+
+.modal-footer .btn-secondary {
+    min-width: 90px;
+}
+
+/* Language Switcher */
+.language-switcher {
+    text-align: center;
+}
+
+.language-switcher .btn {
+    border-radius: 20px;
+    padding: 5px 15px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.language-switcher .btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.language-switcher .btn i {
+    font-size: 0.9rem;
+}
+
+.current-lang {
+    font-weight: 500;
+}
+
+.table-responsive {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+.table {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+.card-body, .card {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+@media (max-width: 600px) {
+    .table-responsive {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    .table {
+        font-size: 0.95rem;
+    }
+}
+
+/* Fix for orange outline on time inputs */
+input[type="time"] {
+    border: 1px solid #ced4da;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+input[type="time"]:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Remove default time input arrow in Chrome */
+input[type="time"]::-webkit-calendar-picker-indicator {
+    display: none;
+}
+
+/* Make time inputs look more like regular inputs */
+input[type="time"] {
+    -webkit-appearance: textfield;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+/* Remove the orange outline specifically from global time inputs */
+#global-in-time:focus,
+#global-out-time:focus {
+    box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25); /* Bootstrap info color */
+    border-color: #17a2b8;
+} 

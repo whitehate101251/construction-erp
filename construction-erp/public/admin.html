@@ -1,0 +1,2523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Construction ERP</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="/js/session-manager.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar {
+            background: linear-gradient(135deg, #343a40 0%, #212529 100%);
+            color: white;
+            min-height: 100vh;
+            padding-top: 1rem;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: fixed;
+            height: 100vh;
+            width: 250px;
+            z-index: 1030;
+            overflow-y: auto;
+            left: 0;
+        }
+        
+        .sidebar.collapsed {
+            left: -250px;
+        }
+        
+        .hamburger {
+            position: fixed;
+            left: 1rem;
+            top: 1rem;
+            background-color: white;
+            border-radius: 4px;
+            padding: 10px;
+            cursor: pointer;
+            z-index: 1050;
+            transition: all 0.3s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .hamburger span {
+            display: block;
+            width: 20px;
+            height: 2px;
+            margin: 4px 0;
+            background-color: #333;
+            transition: all 0.3s;
+        }
+        
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(4px, 6px);
+        }
+        
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(4px, -6px);
+        }
+        
+        /* When sidebar is expanded, position hamburger to the right of the sidebar */
+        .sidebar:not(.collapsed) ~ .content .hamburger {
+            left: 260px;
+        }
+        
+        /* When content is expanded, position hamburger at the left edge */
+        .content.expanded .hamburger {
+            left: 1rem;
+        }
+        
+        .hamburger:hover {
+            transform: scale(1.05);
+        }
+        
+        .content {
+            padding: 20px;
+            transition: all 0.3s ease;
+            margin-left: 250px;
+            width: calc(100% - 250px);
+            padding-top: 60px; /* Add padding to avoid overlap with hamburger menu */
+        }
+        
+        .content.expanded {
+            margin-left: 0;
+            width: 100%;
+        }
+        
+        .section {
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .section.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: #212529;
+            font-weight: 600;
+        }
+        
+        .btn-add {
+            margin-bottom: 1rem;
+        }
+        
+        .table {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .table thead th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            color: #495057;
+            background-color: #f8f9fa;
+            padding: 15px;
+        }
+        
+        .table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+        }
+        
+        .action-buttons {
+            white-space: nowrap;
+        }
+        
+        .foremen-badge {
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 0.35rem 0.75rem;
+            min-width: 2rem;
+            box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2);
+        }
+        
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            border-radius: 10px 10px 0 0;
+            background-color: #fff;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding: 20px;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        .btn {
+            border-radius: 8px;
+            padding: 8px 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+            border: none;
+            box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(13, 110, 253, 0.4);
+            background: linear-gradient(135deg, #0a58ca 0%, #084298 100%);
+        }
+        
+        .modal-content {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .modal-header {
+            border-radius: 10px 10px 0 0;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 10px 15px;
+            border: 1px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+            border-color: #86b7fe;
+        }
+        
+        .site-row:hover {
+            background-color: #f8f9fa;
+        }
+        
+        /* Preloader */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255,255,255,0.9);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.5s ease;
+        }
+        
+        /* Fancy loading animation */
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #0d6efd;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 767.98px) {
+            .sidebar {
+                left: -250px;
+            }
+            
+            .sidebar.collapsed {
+                left: 0;
+            }
+            
+            .content {
+                margin-left: 0;
+                width: 100%;
+                padding-top: 60px; /* Ensure consistent padding on mobile */
+            }
+            
+            .hamburger {
+                left: 1rem;
+                top: 1rem;
+            }
+            
+            .sidebar:not(.collapsed) ~ .content .hamburger {
+                left: 260px;
+            }
+            
+            .hamburger.active {
+                transform: translateX(0);
+            }
+            
+            .sidebar-nav {
+                display: flex;
+                overflow-x: auto;
+                padding: 0.5rem;
+                margin: -0.5rem;
+                scrollbar-width: none;
+            }
+            
+            .sidebar-nav::-webkit-scrollbar {
+                display: none;
+            }
+            
+            .sidebar a {
+                white-space: nowrap;
+                margin: 0 5px;
+                padding: 8px 12px;
+                border-radius: 20px;
+            }
+            
+            .content {
+                padding: 15px 10px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .table-responsive {
+                overflow-x: auto;
+            }
+            
+            .modal-dialog {
+                margin: 0.5rem;
+                max-width: calc(100% - 1rem);
+            }
+            
+            .card:hover {
+                transform: none;
+            }
+            
+            .sidebar h2.text-center,
+            .sidebar h4.text-center {
+                margin-right: 35px; /* Make room for X button */
+                text-align: left !important;
+                padding-left: 15px;
+            }
+        }
+        
+        .sidebar a {
+            color: #ddd;
+            text-decoration: none;
+            display: block;
+            padding: 12px 20px;
+            margin: 5px 10px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar a i {
+            margin-right: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .sidebar a:hover, .sidebar a.active {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .sidebar a.active {
+            background-color: #0d6efd;
+            box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+        }
+        
+        .profile-divider {
+            height: 1px;
+            background-color: rgba(255,255,255,0.1);
+            margin: 10px 10px;
+        }
+        
+        .profile-link {
+            margin-top: auto !important;
+        }
+        
+        /* Sidebar title styles */
+        .sidebar h2.text-center {
+            font-size: 1.75rem;
+            padding: 0.5rem 0;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .sidebar h4.text-center {
+            font-size: 1.25rem;
+            padding: 0.5rem 0;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Preloader -->
+    <div id="preloader">
+        <div class="loader"></div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 sidebar" id="sidebar">
+                <div class="sidebar-nav d-flex flex-column h-100">
+                    <h2 class="text-center my-3 d-none d-md-block">Admin Panel</h2>
+                    <h4 class="text-center d-md-none my-2">Admin</h4>
+                    
+                    <a class="active" href="#" data-section="sites">
+                        <i class="bi bi-building"></i> Sites
+                    </a>
+                    <a href="#" data-section="site-managers">
+                        <i class="bi bi-people"></i> Foremen
+                    </a>
+                    <a href="#" data-section="site-incharge">
+                        <i class="bi bi-person-check"></i> Site Incharge
+                    </a>
+                    <a href="#" data-section="workers">
+                        <i class="bi bi-person-badge"></i> Workers
+                    </a>
+                    <a href="#" data-section="reports">
+                        <i class="bi bi-graph-up"></i> Reports
+                    </a>
+                    
+                    <div class="profile-divider"></div>
+                    
+                    <a href="#" data-section="profile" class="mt-auto">
+                        <i class="bi bi-person-circle"></i> Profile
+                    </a>
+                    
+                    <a href="#" onclick="logout()" class="text-danger">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </a>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 content" id="main-content">
+                <!-- Hamburger Menu Toggle -->
+                <div class="hamburger" id="hamburger-toggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                
+                <!-- Sites Section -->
+                <div id="sites" class="section active">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h1 class="mb-1">Construction Sites</h1>
+                            <p class="text-muted">Manage your construction site locations and assigned foremen</p>
+                        </div>
+                        <button class="btn btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addSiteModal">
+                            <i class="bi bi-plus-lg me-1"></i> Add Site
+                        </button>
+                    </div>
+                    
+                    <!-- Stats cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <div class="card bg-primary bg-opacity-10 border-0 h-100">
+                                <div class="card-body d-flex align-items-center">
+                                    <i class="bi bi-building text-primary fs-1 me-3"></i>
+                                    <div>
+                                        <h5 class="card-title mb-0" id="totalSitesCount">-</h5>
+                                        <p class="card-text text-muted">Total Sites</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <div class="card bg-success bg-opacity-10 border-0 h-100">
+                                <div class="card-body d-flex align-items-center">
+                                    <i class="bi bi-person-check text-success fs-1 me-3"></i>
+                                    <div>
+                                        <h5 class="card-title mb-0" id="totalInchargeCount">-</h5>
+                                        <p class="card-text text-muted">Site Incharge</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <div class="card bg-warning bg-opacity-10 border-0 h-100">
+                                <div class="card-body d-flex align-items-center">
+                                    <i class="bi bi-people text-warning fs-1 me-3"></i>
+                                    <div>
+                                        <h5 class="card-title mb-0" id="totalForemenCount">-</h5>
+                                        <p class="card-text text-muted">Assigned Foremen</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info bg-opacity-10 border-0 h-100">
+                                <div class="card-body d-flex align-items-center">
+                                    <i class="bi bi-person-badge text-info fs-1 me-3"></i>
+                                    <div>
+                                        <h5 class="card-title mb-0" id="totalWorkersCount">-</h5>
+                                        <p class="card-text text-muted">Total Workers</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sites table -->
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-light py-3">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-end-0">
+                                            <i class="bi bi-search"></i>
+                                        </span>
+                                        <input type="text" id="siteSearch" class="form-control border-start-0" placeholder="Search sites..." autofocus>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="loadSites()">
+                                        <i class="bi bi-arrow-repeat me-1"></i> Refresh
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>Site Incharge</th>
+                                    <th>Name</th>
+                                    <th>Location</th>
+                                    <th style="text-align: center;">Total Foremen</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                                <tbody id="sitesList" class="border-top-0">
+                                <!-- Sites will be loaded here -->
+                            </tbody>
+                        </table>
+                        </div>
+                        <div class="card-footer bg-white py-3" id="sitesFooter">
+                            <div id="sitesCount">Loading sites...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Site Managers Section -->
+                <div id="site-managers" class="section">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h1>Foremen</h1>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addManagerModal">
+                            <i class="bi bi-plus-lg"></i> Add Foremen
+                        </button>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Username</th>
+                                    <th>Phone</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="managersList">
+                                <!-- Managers will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Site Incharge Section -->
+                <div id="site-incharge" class="section">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h1>Site Incharge</h1>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addInchargeModal">
+                            <i class="bi bi-plus-lg"></i> Add Site Incharge
+                        </button>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Username</th>
+                                    <th>Phone</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inchargeList">
+                                <!-- Site Incharge users will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Workers Section -->
+                <div id="workers" class="section">
+                    <h1>Workers</h1>
+                    <p>Worker management functionality will be added soon.</p>
+                </div>
+
+                <!-- Reports Section -->
+                <div id="reports" class="section">
+                    <h1>Reports</h1>
+                    <p>Reporting functionality will be added soon.</p>
+                </div>
+                
+                <!-- Profile Section -->
+                <div id="profile" class="section">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h1 class="mb-1">My Profile</h1>
+                            <p class="text-muted">Manage your account information and password</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="card shadow-sm border-0 mb-4">
+                                <div class="card-header bg-light py-3">
+                                    <h5 class="mb-0">Personal Information</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="profile-form">
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Full Name</label>
+                                                <input type="text" class="form-control" id="profile-name" placeholder="Your Name">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Email</label>
+                                                <input type="email" class="form-control" id="profile-email" placeholder="your@email.com" disabled>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Username</label>
+                                                <input type="text" class="form-control" id="profile-username" placeholder="Your Username">
+                                                <small class="text-muted">This is your login username. No @ symbol required.</small>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Phone Number</label>
+                                                <input type="tel" class="form-control" id="profile-phone" placeholder="Your Phone Number">
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Role</label>
+                                                <input type="text" class="form-control" id="profile-role" disabled>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <button type="button" class="btn btn-primary" id="update-profile-btn">
+                                                <i class="bi bi-save me-1"></i> Save Changes
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            
+                            <div class="card shadow-sm border-0">
+                                <div class="card-header bg-light py-3">
+                                    <h5 class="mb-0">Change Password</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="password-form">
+                                        <div class="mb-3">
+                                            <label class="form-label">Current Password</label>
+                                            <input type="password" class="form-control" id="current-password" placeholder="Enter current password">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">New Password</label>
+                                            <input type="password" class="form-control" id="new-password" placeholder="Enter new password">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Confirm New Password</label>
+                                            <input type="password" class="form-control" id="confirm-password" placeholder="Confirm new password">
+                                        </div>
+                                        <div class="text-end">
+                                            <button type="button" class="btn btn-primary" id="change-password-btn">
+                                                <i class="bi bi-shield-lock me-1"></i> Update Password
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-4">
+                            <div class="card shadow-sm border-0 mb-4">
+                                <div class="card-body text-center py-5">
+                                    <div class="avatar mb-4">
+                                        <i class="bi bi-person-circle display-1 text-primary"></i>
+                                    </div>
+                                    <h4 id="profile-display-name">Admin User</h4>
+                                    <p class="text-muted mb-4" id="profile-display-email">admin@example.com</p>
+                                </div>
+                            </div>
+                            
+                            <div class="card shadow-sm border-0">
+                                <div class="card-header bg-light py-3">
+                                    <h5 class="mb-0">Account Information</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Account Type</span>
+                                        <span class="badge bg-primary">Administrator</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Last Login</span>
+                                        <span id="last-login-time">Today</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Manager Modal -->
+    <div class="modal fade" id="addManagerModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Foremen</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addManagerForm">
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" name="password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" class="form-control" name="phone">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveManagerBtn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Site Modal -->
+    <div class="modal fade" id="addSiteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Site</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addSiteForm">
+                        <div class="mb-3">
+                            <label class="form-label">Site Name</label>
+                            <input type="text" class="form-control" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Location</label>
+                            <input type="text" class="form-control" name="location" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Site Incharge</label>
+                            <select class="form-select" name="siteIncharge">
+                                <option value="">No Incharge Assigned</option>
+                                <!-- Site Incharge options will be loaded here -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Foremen</label>
+                            <select class="form-select" name="siteManager" required>
+                                <!-- Foremen will be loaded here -->
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveSiteBtn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Site Manager Modal -->
+    <div class="modal fade" id="editManagerModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Foremen</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editManagerForm">
+                        <input type="hidden" id="edit-manager-id">
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" id="edit-manager-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" id="edit-manager-username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="edit-manager-phone">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password (leave blank to keep current)</label>
+                            <input type="password" class="form-control" id="edit-manager-password">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="updateManagerBtn">Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Site Modal -->
+    <div class="modal fade" id="editSiteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Site</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editSiteForm">
+                        <input type="hidden" id="edit-site-id">
+                        <div class="mb-3">
+                            <label class="form-label">Site Name</label>
+                            <input type="text" class="form-control" id="edit-site-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Location</label>
+                            <input type="text" class="form-control" id="edit-site-location" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Site Incharge</label>
+                            <select class="form-select" id="edit-site-incharge">
+                                <option value="">No Incharge Assigned</option>
+                                <!-- Site Incharge options will be loaded here -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Foremen</label>
+                            <select class="form-select" id="edit-site-manager" required>
+                                <!-- Foremen will be loaded here -->
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="updateSiteBtn">Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assign Foremen Modal -->
+    <div class="modal fade" id="assignForemenModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Assign Foremen to Site: <span id="assign-site-name"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="assignForemenForm">
+                        <input type="hidden" id="assign-site-id">
+                        <div class="mb-3">
+                            <label class="form-label">Select Foremen</label>
+                            <select class="form-select" id="assign-foremen" required>
+                                <!-- Foremen options will be loaded here -->
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="assignForemenBtn">Assign</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Site Incharge Modal -->
+    <div class="modal fade" id="addInchargeModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Site Incharge</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addInchargeForm">
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" name="password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" class="form-control" name="phone">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveInchargeBtn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Site Incharge Modal -->
+    <div class="modal fade" id="editInchargeModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Site Incharge</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editInchargeForm">
+                        <input type="hidden" id="edit-incharge-id">
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" id="edit-incharge-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" id="edit-incharge-username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="edit-incharge-phone">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password (leave blank to keep current)</label>
+                            <input type="password" class="form-control" id="edit-incharge-password">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="updateInchargeBtn">Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap & jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // API URL setup
+        const API_URL = 'http://localhost:3000/api';
+        
+        // Authentication header function
+        function getAuthHeader() {
+            const token = localStorage.getItem('token');
+            return token ? `Bearer ${token}` : '';
+        }
+        
+        // Logout function
+        function logout() {
+            try {
+                // Clear all authentication tokens and user data
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                sessionStorage.clear();
+                
+                // Redirect to login page
+                window.location.href = '/login.html';
+            } catch (error) {
+                console.error('Error during logout:', error);
+                alert('Error during logout. Please try again.');
+            }
+        }
+        
+        // Hide preloader when page is loaded
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const preloader = document.getElementById('preloader');
+                preloader.style.opacity = '0';
+                setTimeout(() => {
+                    preloader.style.display = 'none';
+                }, 500);
+            }, 500); // Small delay for smoother transition
+        });
+        
+        // Debounce function to limit function calls
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+        
+        // Check authentication
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            // Load user profile data
+            loadUserProfile();
+            
+            // Add event listener for update site button
+            document.getElementById('updateSiteBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                updateSite();
+            });
+            
+            // Setup hamburger menu
+            const hamburger = document.getElementById('hamburger-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            
+            // Correctly set initial state
+            function updateMenuState() {
+                if (sidebar.classList.contains('collapsed')) {
+                    // Sidebar is collapsed (hidden)
+                    hamburger.classList.remove('active'); // Show hamburger icon (three lines)
+                    mainContent.classList.add('expanded'); // Expand content area
+                } else {
+                    // Sidebar is expanded (visible)
+                    hamburger.classList.add('active'); // Show X icon
+                    mainContent.classList.remove('expanded'); // Normal content area
+                }
+            }
+            
+            // Set initial state based on screen size
+            if (window.innerWidth < 768) {
+                // On mobile, sidebar is collapsed by default
+                sidebar.classList.add('collapsed');
+            } else {
+                // On desktop, sidebar is expanded by default
+                sidebar.classList.remove('collapsed');
+            }
+            
+            // Update menu state based on sidebar state
+            updateMenuState();
+            
+            hamburger.addEventListener('click', function() {
+                // Toggle sidebar state
+                sidebar.classList.toggle('collapsed');
+                
+                // Update hamburger icon and content width based on sidebar state
+                updateMenuState();
+            });
+            
+            // Window resize handling
+            window.addEventListener('resize', function() {
+                if (window.innerWidth < 768) {
+                    // On mobile, sidebar should be collapsed by default
+                    sidebar.classList.add('collapsed');
+                }
+                
+                // Update menu state based on new sidebar state
+                updateMenuState();
+            });
+            
+            // Section navigation
+            document.querySelectorAll('.sidebar-nav a[data-section]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Update active link
+                    document.querySelectorAll('.sidebar-nav a').forEach(a => {
+                        a.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    // Show selected section
+                    const section = this.getAttribute('data-section');
+                    document.querySelectorAll('.section').forEach(s => {
+                        s.classList.remove('active');
+                    });
+                    
+                    // Delay adding active class for animation
+                    setTimeout(() => {
+                    document.getElementById(section).classList.add('active');
+                    }, 50);
+                    
+                    // Load section data
+                    if (section === 'site-managers') loadManagers();
+                    else if (section === 'site-incharge') loadIncharge();
+                    else if (section === 'sites') {
+                        loadSites();
+                        loadManagersForDropdown();
+                    }
+                });
+            });
+            
+            // Setup modal events
+            document.querySelector('[data-bs-target="#addSiteModal"]').addEventListener('click', () => {
+                loadManagersForDropdown();
+            });
+            
+            // Initial data load - Load sites immediately on page load
+            loadSites();
+            loadManagersForDropdown();
+            
+            // Set up event listeners for incharge
+            document.getElementById('updateInchargeBtn').addEventListener('click', function() {
+                // Getting values directly from the form
+                const inchargeId = document.getElementById('edit-incharge-id').value;
+                const name = document.getElementById('edit-incharge-name').value;
+                const username = document.getElementById('edit-incharge-username').value;
+                const phone = document.getElementById('edit-incharge-phone').value;
+                const password = document.getElementById('edit-incharge-password').value;
+                
+                updateIncharge(inchargeId, name, username, phone, password);
+            });
+            
+            // Add search debounce for better performance
+            const siteSearch = document.getElementById('siteSearch');
+            if (siteSearch) {
+                siteSearch.addEventListener('input', debounce(function() {
+                    const searchTerm = this.value.toLowerCase();
+                    const siteRows = document.querySelectorAll('.site-row');
+                    
+                    siteRows.forEach(row => {
+                        const siteName = row.querySelector('.site-name').textContent.toLowerCase();
+                        const siteLocation = row.querySelector('.site-location').textContent.toLowerCase();
+                        const siteIncharge = row.querySelector('.site-incharge').textContent.toLowerCase();
+                        
+                        if (siteName.includes(searchTerm) || 
+                            siteLocation.includes(searchTerm) || 
+                            siteIncharge.includes(searchTerm)) {
+                            row.style.display = '';
+                            // Also show associated details row if it was visible
+                            const detailsRow = row.nextElementSibling;
+                            if (detailsRow && detailsRow.classList.contains('site-details') && 
+                                detailsRow.style.display !== 'none') {
+                                detailsRow.style.display = 'table-row';
+                            }
+                        } else {
+                            row.style.display = 'none';
+                            // Hide associated details row
+                            const detailsRow = row.nextElementSibling;
+                            if (detailsRow && detailsRow.classList.contains('site-details')) {
+                                detailsRow.style.display = 'none';
+                            }
+                        }
+                    });
+                    
+                    // Update count of visible sites
+                    const sitesCount = document.getElementById('sitesCount').getAttribute('data-total');
+                    const visibleSites = document.querySelectorAll('.site-row[style=""],.site-row:not([style])').length;
+                    document.getElementById('sitesCount').textContent = 
+                        `Showing ${visibleSites} of ${sitesCount} site${sitesCount !== 1 ? 's' : ''}`;
+                }, 300));
+            }
+        });
+
+        // Use the current origin for API calls
+        let token = localStorage.getItem('token');
+        let currentUser = JSON.parse(localStorage.getItem('user'));
+
+        // Initialize session manager
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize session manager
+            sessionManager.init();
+            
+            // Check for multiple tabs
+            sessionManager.notifyMultipleTabs();
+            
+            // Check again when the window gets focus
+            window.addEventListener('focus', function() {
+                sessionManager.notifyMultipleTabs();
+            });
+        });
+
+        // Check if user is admin
+        if (!token || !currentUser || currentUser.role !== 'admin') {
+            window.location.href = '/login.html';
+        }
+
+        // Load Site Managers
+        async function loadManagers() {
+            try {
+                console.log('Fetching foremen with token:', token);
+                const response = await fetch(`${API_URL}/users`, {
+                    headers: {
+                        'Authorization': getAuthHeader()
+                    }
+                });
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                const managersList = document.getElementById('managersList');
+                managersList.innerHTML = '';
+
+                // Filter to only show site managers
+                const managers = data.data.users.filter(user => user.role === 'site_manager');
+                
+                if (managers.length === 0) {
+                    managersList.innerHTML = `<tr><td colspan="4" class="text-center">No foremen found</td></tr>`;
+                    return;
+                }
+                
+                managers.forEach((manager, index) => {
+                        const row = document.createElement('tr');
+                    const name = manager.name || 'No Name';
+                    const username = manager.username || 'No Username';
+                    const phone = manager.phone || '-';
+                    
+                        row.innerHTML = `
+                        <td>${name}</td>
+                        <td>${username}</td>
+                        <td>${phone}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="editManager('${manager._id}', '${name}', '${username}', '${phone}')">
+                                <i class="bi bi-pencil"></i>
+                                </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteManager('${manager._id}', '${name}')">
+                                <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        `;
+                    
+                        managersList.appendChild(row);
+                });
+                
+            } catch (error) {
+                console.error('Error loading managers:', error);
+                document.getElementById('managersList').innerHTML = 
+                    `<tr><td colspan="4" class="text-danger">Error loading foremen: ${error.message}</td></tr>`;
+            }
+        }
+
+        // Load Site Incharge
+        async function loadIncharge() {
+            try {
+                console.log('Fetching site incharge users with token:', token);
+                const response = await fetch(`${API_URL}/users`, {
+                    headers: {
+                        'Authorization': getAuthHeader()
+                    }
+                });
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                const inchargeList = document.getElementById('inchargeList');
+                inchargeList.innerHTML = '';
+                
+                // Filter to only show site incharge users
+                const inchargeUsers = data.data.users.filter(user => user.role === 'site_incharge');
+                
+                if (inchargeUsers.length === 0) {
+                    inchargeList.innerHTML = `<tr><td colspan="4" class="text-center">No site incharge users found</td></tr>`;
+                    return;
+                }
+                
+                inchargeUsers.forEach((incharge, index) => {
+                    const row = document.createElement('tr');
+                    const name = incharge.name || 'No Name';
+                    const username = incharge.username || 'No Username';
+                    const phone = incharge.phone || '-';
+                    
+                    row.innerHTML = `
+                        <td>${name}</td>
+                        <td>${username}</td>
+                        <td>${phone}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="editIncharge('${incharge._id}', '${name}', '${username}', '${phone}')">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteIncharge('${incharge._id}', '${name}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    
+                    inchargeList.appendChild(row);
+                });
+                
+            } catch (error) {
+                console.error('Error loading site incharge users:', error);
+                document.getElementById('inchargeList').innerHTML = 
+                    `<tr><td colspan="4" class="text-danger">Error loading site incharge users: ${error.message}</td></tr>`;
+            }
+        }
+
+        // Load managers for dropdown selection
+        async function loadManagersForDropdown() {
+            try {
+                const response = await fetch(`${API_URL}/users?role=site_manager`, {
+                    headers: {
+                        'Authorization': getAuthHeader()
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load managers');
+                }
+                
+                const data = await response.json();
+                
+                // Update the dropdown in add site modal
+                const addSiteManagerSelect = document.querySelector('select[name="siteManager"]');
+                addSiteManagerSelect.innerHTML = '<option value="">Select a manager</option>';
+                
+                // Update the dropdown in edit site modal
+                const editSiteManagerSelect = document.getElementById('edit-site-manager');
+                editSiteManagerSelect.innerHTML = '<option value="">Select a manager</option>';
+                
+                data.data.users.forEach(manager => {
+                    if (manager.role === 'site_manager') {
+                        // Add option to add site modal
+                        const addOption = document.createElement('option');
+                        addOption.value = manager._id;
+                        addOption.textContent = manager.name;
+                        addSiteManagerSelect.appendChild(addOption);
+                        
+                        // Add option to edit site modal
+                        const editOption = document.createElement('option');
+                        editOption.value = manager._id;
+                        editOption.textContent = manager.name;
+                        editSiteManagerSelect.appendChild(editOption);
+                    }
+                });
+                
+                // Load site incharge for dropdowns
+                loadInchargeForDropdown();
+            } catch (error) {
+                console.error('Error loading managers for dropdown:', error);
+                alert('Error loading managers. Please try again.');
+            }
+        }
+        
+        // Load site incharge for dropdown selection
+        async function loadInchargeForDropdown() {
+            try {
+                const response = await fetch(`${API_URL}/users?role=site_incharge`, {
+                    headers: {
+                        'Authorization': getAuthHeader()
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load site incharge users');
+                }
+                
+                const data = await response.json();
+                
+                // Update the dropdown in add site modal
+                const addSiteInchargeSelect = document.querySelector('select[name="siteIncharge"]');
+                addSiteInchargeSelect.innerHTML = '<option value="">No Incharge Assigned</option>';
+                
+                // Update the dropdown in edit site modal
+                const editSiteInchargeSelect = document.getElementById('edit-site-incharge');
+                editSiteInchargeSelect.innerHTML = '<option value="">No Incharge Assigned</option>';
+                
+                data.data.users.forEach(incharge => {
+                    if (incharge.role === 'site_incharge') {
+                        // Add option to add site modal
+                        const addOption = document.createElement('option');
+                        addOption.value = incharge._id;
+                        addOption.textContent = incharge.name;
+                        addSiteInchargeSelect.appendChild(addOption);
+                        
+                        // Add option to edit site modal
+                        const editOption = document.createElement('option');
+                        editOption.value = incharge._id;
+                        editOption.textContent = incharge.name;
+                        editSiteInchargeSelect.appendChild(editOption);
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading site incharge for dropdown:', error);
+                alert('Error loading site incharge users. Please try again.');
+            }
+        }
+
+        // Load Sites
+        async function loadSites() {
+            try {
+                // Show loading indicator
+                const sitesList = document.getElementById('sitesList');
+                sitesList.innerHTML = '<tr><td colspan="5" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div> Loading sites...</td></tr>';
+                
+                document.getElementById('sitesCount').textContent = 'Loading...';
+                document.getElementById('totalSitesCount').textContent = '-';
+                document.getElementById('totalForemenCount').textContent = '-';
+                
+                // Fetch sites data
+                const response = await fetch(`${API_URL}/sites`, {
+                    headers: {
+                        'Authorization': getAuthHeader()
+                    }
+                });
+                
+                // Handle different response statuses appropriately
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Error loading sites');
+                }
+                
+                const data = await response.json();
+                
+                // Clear the loading indicator
+                sitesList.innerHTML = '';
+                
+                // Check if data exists and has the expected structure
+                if (!data.data || !Array.isArray(data.data.sites)) {
+                    throw new Error('Invalid response format from server');
+                }
+                
+                // Update site statistics
+                const sitesCount = data.data.sites.length;
+                document.getElementById('totalSitesCount').textContent = sitesCount;
+                document.getElementById('sitesCount').textContent = `Showing ${sitesCount} site${sitesCount !== 1 ? 's' : ''}`;
+                document.getElementById('sitesCount').setAttribute('data-total', sitesCount);
+                
+                // Count total foremen (primary + additional)
+                let totalForemen = 0;
+                let uniqueForemen = new Set();
+                let uniqueIncharge = new Set();
+
+                data.data.sites.forEach(site => {
+                    if (site.siteManager) {
+                        uniqueForemen.add(site.siteManager._id);
+                    }
+                    
+                    if (site.siteIncharge) {
+                        uniqueIncharge.add(site.siteIncharge._id);
+                    }
+                    
+                    if (site.additionalForemen && Array.isArray(site.additionalForemen)) {
+                        site.additionalForemen.forEach(foreman => {
+                            if (foreman && foreman._id) {
+                                uniqueForemen.add(foreman._id);
+                            }
+                        });
+                    }
+                });
+                
+                document.getElementById('totalForemenCount').textContent = uniqueForemen.size;
+                document.getElementById('totalInchargeCount').textContent = uniqueIncharge.size;
+                
+                // Count total workers (placeholder - would need an actual API call)
+                fetch(`${API_URL}/workers/count`, {
+                    headers: { 'Authorization': getAuthHeader() }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.count) {
+                        document.getElementById('totalWorkersCount').textContent = data.count;
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching workers count:', err);
+                    document.getElementById('totalWorkersCount').textContent = '?';
+                });
+                
+                // If no sites found, show a message
+                if (data.data.sites.length === 0) {
+                    sitesList.innerHTML = '<tr><td colspan="5" class="text-center py-4"><i class="bi bi-exclamation-circle text-muted me-2"></i>No sites found. Add a site to get started.</td></tr>';
+                    return;
+                }
+
+                data.data.sites.forEach((site, index) => {
+                    const row = document.createElement('tr');
+                    row.classList.add('site-row');
+                    row.dataset.siteId = site._id;
+                    row.style.cursor = 'pointer'; // Add cursor pointer to indicate clickable
+                    
+                    // Add animation delay based on index
+                    row.style.animation = `fadeIn 0.3s ease forwards ${index * 0.05}s`;
+                    row.style.opacity = '0';
+                    
+                    // Get manager name safely, providing a fallback if manager is null
+                    const managerName = site.siteManager ? site.siteManager.name : 'No manager assigned';
+                    const managerId = site.siteManager ? site.siteManager._id : '';
+                    
+                    // Get site incharge name safely
+                    const inchargeName = site.siteIncharge ? site.siteIncharge.name : 'No incharge assigned';
+                    const inchargeId = site.siteIncharge ? site.siteIncharge._id : '';
+                    
+                    // Count additional foremen
+                    const additionalForemenCount = site.additionalForemen && Array.isArray(site.additionalForemen) 
+                        ? site.additionalForemen.length 
+                        : 0;
+                    
+                    // Calculate total foremen count (primary + additional)
+                    const totalForemenCount = (site.siteManager ? 1 : 0) + additionalForemenCount;
+                    
+                    row.innerHTML = `
+                        <td class="site-incharge">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-person-check me-2 text-success"></i>
+                                ${inchargeName}
+                            </div>
+                        </td>
+                        <td class="site-name fw-medium">${site.name}</td>
+                        <td class="site-location text-muted">
+                            <i class="bi bi-geo-alt me-1 text-secondary"></i>${site.location}
+                        </td>
+                        <td class="text-center">
+                            <span class="fw-bold fs-6">${totalForemenCount}</span>
+                        </td>
+                        <td class="text-center action-buttons">
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="event.stopPropagation(); editSite('${site._id}', '${site.name}', '${site.location}', '${managerId}', '${inchargeId}')">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="event.stopPropagation(); deleteSite('${site._id}', '${site.name}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    
+                    // Create expandable details row
+                    const detailsRow = document.createElement('tr');
+                    detailsRow.classList.add('site-details');
+                    detailsRow.style.display = 'none';
+                    
+                    // Show incharge information
+                    const inchargeInfo = site.siteIncharge ? 
+                        `<div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-person-check-fill me-2 text-success fs-5"></i>
+                            <div>
+                                <h6 class="mb-0">${site.siteIncharge.name}</h6>
+                                <small class="text-muted">${site.siteIncharge.username}</small>
+                            </div>
+                        </div>` :
+                        `<p class="text-muted mb-3"><i class="bi bi-exclamation-circle me-2"></i>No site incharge assigned</p>`;
+                    
+                    // Collect all foremen into a single array
+                    let allForemen = [];
+                    
+                    // Add primary foreman if it exists
+                    if (site.siteManager && site.siteManager.name) {
+                        allForemen.push({
+                            id: site.siteManager._id,
+                            name: site.siteManager.name,
+                            isPrimary: true
+                        });
+                    }
+                    
+                    // Add additional foremen if they exist
+                    if (site.additionalForemen && Array.isArray(site.additionalForemen)) {
+                        site.additionalForemen.forEach(foreman => {
+                            if (foreman && foreman.name) {
+                                allForemen.push({
+                                    id: foreman._id,
+                                    name: foreman.name,
+                                    isPrimary: false
+                                });
+                            }
+                        });
+                    }
+                    
+                    // Generate HTML for all foremen
+                    let foremenListHTML = '';
+                    if (allForemen.length > 0) {
+                        foremenListHTML = '<div class="list-group">';
+                        allForemen.forEach(foreman => {                                
+                            foremenListHTML += `
+                                <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" 
+                                   onclick="viewForemenAttendance('${foreman.id}', '${foreman.name}', '${site._id}', '${site.name}')">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-person-badge me-3 text-primary"></i>
+                                        <span class="fw-medium">${foreman.name}</span>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-danger delete-foreman-btn" 
+                                        onclick="event.stopPropagation(); removeForemenFromSite('${foreman.id}', '${foreman.name}', '${site._id}', '${site.name}')">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
+                            `;
+                        });
+                        foremenListHTML += '</div>';
+                    } else {
+                        foremenListHTML = '<p class="text-muted">No foremen assigned to this site.</p>';
+                    }
+                    
+                    detailsRow.innerHTML = `
+                        <td colspan="5">
+                            <div class="card mb-3 border-0 shadow-sm">
+                                <div class="card-header bg-light py-3">
+                                    <h5 class="mb-0">Site Management</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6 class="border-bottom pb-2 mb-3">Site Incharge</h6>
+                                            ${inchargeInfo}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h6 class="border-bottom pb-2 mb-3">Site Foremen</h6>
+                                    <button class="btn btn-sm btn-success" onclick="addForemenToSite('${site._id}', '${site.name}')">
+                                                    <i class="bi bi-plus-lg me-1"></i> Add Foremen
+                                    </button>
+                                </div>
+                                            <p class="text-muted mb-3"><i class="bi bi-info-circle me-2"></i>Click on a foreman to view their attendance records</p>
+                                            ${foremenListHTML}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    `;
+                    
+                    // Add row to table
+                    sitesList.appendChild(row);
+                    sitesList.appendChild(detailsRow);
+                    
+                    // Function to toggle details row
+                    const toggleDetails = function() {
+                        const detailsVisible = detailsRow.style.display !== 'none';
+                        
+                        if (detailsVisible) {
+                            detailsRow.style.display = 'none';
+                        } else {
+                            detailsRow.style.display = 'table-row';
+                        }
+                    };
+                    
+                    // Add click event to entire row (except buttons)
+                    row.addEventListener('click', function(e) {
+                        // Only toggle if the click wasn't on a button
+                        if (!e.target.closest('button')) {
+                            toggleDetails();
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error('Error loading sites:', error);
+                const sitesList = document.getElementById('sitesList');
+                sitesList.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Error loading sites: ${error.message}</td></tr>`;
+            }
+        }
+
+        // Add Site Manager
+        document.getElementById('saveManagerBtn').addEventListener('click', async () => {
+            const form = document.getElementById('addManagerForm');
+            const formData = new FormData(form);
+            
+            try {
+                // Validation checks
+                const name = formData.get('name');
+                const username = formData.get('username');
+                const password = formData.get('password');
+                
+                if (!name || !username || !password) {
+                    alert('Please fill all required fields: name, username, and password');
+                    return;
+                }
+                
+                console.log('Adding foremen with data:', {
+                    name: name,
+                    username: username,
+                    hasPassword: !!password
+                });
+                
+                const response = await fetch(`${API_URL}/users`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': getAuthHeader()
+                    },
+                    body: JSON.stringify({
+                        name: formData.get('name'),
+                        username: formData.get('username'),
+                        password: formData.get('password'),
+                        phone: formData.get('phone'),
+                        role: 'site_manager'
+                    })
+                });
+
+                if (response.ok) {
+                    bootstrap.Modal.getInstance(document.getElementById('addManagerModal')).hide();
+                    form.reset();
+                    loadManagers();
+                    alert('Foremen added successfully');
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Error adding foremen');
+                }
+            } catch (error) {
+                console.error('Error adding foremen:', error);
+                alert('Error adding foremen: ' + error.message);
+            }
+        });
+
+        // Add Site
+        document.getElementById('saveSiteBtn').addEventListener('click', async () => {
+            const form = document.getElementById('addSiteForm');
+            const formData = new FormData(form);
+            
+            // Get the values
+            const name = formData.get('name');
+            const location = formData.get('location');
+            const siteManager = formData.get('siteManager');
+            const siteIncharge = formData.get('siteIncharge');
+            
+            // Validate input
+            if (!name || !location || !siteManager) {
+                alert('Please fill out all required fields');
+                return;
+            }
+            
+            // Prepare request data
+            const requestData = {
+                name,
+                location,
+                siteManager
+            };
+            
+            // Add site incharge if selected
+            if (siteIncharge) {
+                requestData.siteIncharge = siteIncharge;
+            }
+            
+            console.log('Creating site with data:', requestData);
+            console.log('API endpoint:', `${API_URL}/sites`);
+            console.log('Auth header:', getAuthHeader());
+            
+            try {
+                const response = await fetch(`${API_URL}/sites`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': getAuthHeader()
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                const data = await response.json();
+                console.log('Server response:', data);
+                
+                if (response.ok) {
+                    bootstrap.Modal.getInstance(document.getElementById('addSiteModal')).hide();
+                    form.reset();
+                    loadSites();
+                    alert('Site added successfully');
+                } else {
+                    console.error('Server returned an error:', data);
+                    alert(`Error adding site: ${data.message || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error('Error adding site:', error);
+                alert(`Error adding site: ${error.message}`);
+            }
+        });
+
+        // Delete Manager
+        async function deleteManager(userId, name) {
+            if (!confirm(`Are you sure you want to delete the foremen "${name}"?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': getAuthHeader()
+                    }
+                });
+
+                if (response.ok) {
+                    loadManagers();
+                    alert('Foremen deleted successfully');
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Error deleting foremen');
+                }
+            } catch (error) {
+                console.error('Error deleting foremen:', error);
+                alert('Error deleting foremen');
+            }
+        }
+
+        // Add Site Incharge
+        document.getElementById('saveInchargeBtn').addEventListener('click', async () => {
+            const form = document.getElementById('addInchargeForm');
+            const formData = new FormData(form);
+            
+            try {
+                // Validation checks
+                const name = formData.get('name');
+                const username = formData.get('username');
+                const password = formData.get('password');
+                
+                if (!name || !username || !password) {
+                    alert('Please fill all required fields: name, username, and password');
+                    return;
+                }
+                
+                console.log('Adding site incharge with data:', {
+                    name: name,
+                    username: username,
+                    hasPassword: !!password
+                });
+                
+                const response = await fetch(`${API_URL}/users`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': getAuthHeader()
+                    },
+                    body: JSON.stringify({
+                        name: formData.get('name'),
+                        username: formData.get('username'),
+                        password: formData.get('password'),
+                        phone: formData.get('phone'),
+                        role: 'site_incharge'
+                    })
+                });
+
+                if (response.ok) {
+                    bootstrap.Modal.getInstance(document.getElementById('addInchargeModal')).hide();
+                    form.reset();
+                    loadIncharge();
+                    alert('Site incharge added successfully');
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Error adding site incharge');
+                }
+            } catch (error) {
+                console.error('Error adding site incharge:', error);
+                alert('Error adding site incharge: ' + error.message);
+            }
+        });
+
+        // Update Site Incharge function
+        async function updateIncharge(inchargeId, name, username, phone, password) {
+            try {
+                // Prepare request data
+                const requestData = {
+                    name: name,
+                    username: username,
+                    phone: phone
+                };
+                
+                // Only include password if it's provided
+                if (password && password.trim() !== '') {
+                    requestData.password = password;
+                }
+                
+                console.log('Updating site incharge with ID:', inchargeId);
+                console.log('Update data:', requestData);
+                
+                const response = await fetch(`${API_URL}/users/${inchargeId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': getAuthHeader()
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                if (response.ok) {
+                    bootstrap.Modal.getInstance(document.getElementById('editInchargeModal')).hide();
+                    loadIncharge();
+                    alert('Site incharge updated successfully');
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error response:', errorData);
+                    alert(errorData.message || 'Error updating site incharge');
+                }
+            } catch (error) {
+                console.error('Error updating site incharge:', error);
+                alert('Error updating site incharge: ' + error.message);
+            }
+        }
+
+        // Delete Site Incharge
+        async function deleteIncharge(userId, name) {
+            if (!confirm(`Are you sure you want to delete the site incharge "${name}"?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': getAuthHeader()
+                    }
+                });
+
+                if (response.ok) {
+                    loadIncharge();
+                    alert('Site incharge deleted successfully');
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Error deleting site incharge');
+                }
+            } catch (error) {
+                console.error('Error deleting site incharge:', error);
+                alert('Error deleting site incharge');
+            }
+        }
+
+        // Edit Site - Open Edit Modal
+        function editSite(id, name, location, managerId, inchargeId) {
+            console.log('Opening edit modal with data:', { id, name, location, managerId, inchargeId });
+            
+            // Set values in form
+            document.getElementById('edit-site-id').value = id;
+            document.getElementById('edit-site-name').value = name;
+            document.getElementById('edit-site-location').value = location || '';
+            
+            // Load managers and incharge options first if not already loaded
+            Promise.all([loadManagersForDropdown(), loadInchargeForDropdown()]).then(() => {
+                // Select the current manager in the dropdown after options are loaded
+                const managerSelect = document.getElementById('edit-site-manager');
+                if (managerId && managerSelect) {
+                    managerSelect.value = managerId;
+                }
+                
+                // Select the current incharge in the dropdown after options are loaded
+                const inchargeSelect = document.getElementById('edit-site-incharge');
+                if (inchargeId && inchargeSelect) {
+                    inchargeSelect.value = inchargeId;
+                }
+                
+                // Show the modal
+            const modal = new bootstrap.Modal(document.getElementById('editSiteModal'));
+            modal.show();
+            }).catch(error => {
+                console.error('Error loading dropdown options:', error);
+                alert('Error loading manager/incharge options');
+            });
+        }
+        
+        // Update Site - Handle Form Submission
+        async function updateSite() {
+            const updateButton = document.getElementById('updateSiteBtn');
+            const originalButtonText = updateButton.innerHTML;
+            
+            try {
+                // Get form elements
+                const siteId = document.getElementById('edit-site-id').value;
+                const name = document.getElementById('edit-site-name').value.trim();
+                const location = document.getElementById('edit-site-location').value.trim();
+                const siteManager = document.getElementById('edit-site-manager').value;
+                const siteIncharge = document.getElementById('edit-site-incharge').value;
+                
+                console.log('Updating site with data:', {
+                    siteId,
+                    name,
+                    location,
+                    siteManager,
+                    siteIncharge
+                });
+                
+                // Validate input
+                if (!siteId) {
+                    throw new Error('Site ID is missing');
+                }
+                
+                if (!name) {
+                    throw new Error('Please enter a site name');
+                }
+                
+                if (!location) {
+                    throw new Error('Please enter a site location');
+                }
+                
+                if (!siteManager) {
+                    throw new Error('Please select a site manager');
+                }
+                
+                // Show loading state
+                updateButton.disabled = true;
+                updateButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Updating...';
+                
+                // Prepare request data
+                const requestData = {
+                    name,
+                    location,
+                    siteManager
+                };
+                
+                // Add site incharge if selected
+                if (siteIncharge) {
+                    requestData.siteIncharge = siteIncharge;
+                }
+                
+                const apiUrl = `${API_URL}/sites/${siteId}`;
+                console.log('Making PATCH request to:', apiUrl);
+                console.log('Request data:', requestData);
+                console.log('Auth header:', getAuthHeader());
+                
+                const response = await fetch(apiUrl, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': getAuthHeader()
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to update site');
+                }
+                
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editSiteModal'));
+                if (modal) {
+                    modal.hide();
+                }
+                
+                // Reload sites list
+                await loadSites();
+                
+                // Show success message
+                alert('Site updated successfully');
+                
+            } catch (error) {
+                console.error('Error updating site:', error);
+                alert('Error updating site: ' + error.message);
+            } finally {
+                // Reset button state
+                updateButton.disabled = false;
+                updateButton.innerHTML = originalButtonText;
+            }
+        }
+
+        // Edit Manager
+        function editManager(id, name, username, phone) {
+            document.getElementById('edit-manager-id').value = id;
+            document.getElementById('edit-manager-name').value = name;
+            document.getElementById('edit-manager-username').value = username;
+            document.getElementById('edit-manager-phone').value = phone || '';
+            document.getElementById('edit-manager-password').value = '';
+            
+            const modal = new bootstrap.Modal(document.getElementById('editManagerModal'));
+            modal.show();
+        }
+        
+        // Update Manager
+        document.getElementById('updateManagerBtn').addEventListener('click', async () => {
+            const id = document.getElementById('edit-manager-id').value;
+            const name = document.getElementById('edit-manager-name').value;
+            const username = document.getElementById('edit-manager-username').value;
+            const phone = document.getElementById('edit-manager-phone').value;
+            const password = document.getElementById('edit-manager-password').value;
+            
+            try {
+                const data = {
+                    name,
+                    username,
+                    phone
+                };
+                
+                if (password) {
+                    data.password = password;
+                }
+                
+                const response = await fetch(`${API_URL}/users/${id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': getAuthHeader()
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    bootstrap.Modal.getInstance(document.getElementById('editManagerModal')).hide();
+                    loadManagers();
+                    alert('Foremen updated successfully');
+                } else {
+                    const errorData = await response.json();
+                    alert(errorData.message || 'Error updating foremen');
+                }
+            } catch (error) {
+                console.error('Error updating foremen:', error);
+                alert('Error updating foremen');
+            }
+        });
+        
+        // Edit Incharge
+        function editIncharge(id, name, username, phone) {
+            document.getElementById('edit-incharge-id').value = id;
+            document.getElementById('edit-incharge-name').value = name;
+            document.getElementById('edit-incharge-username').value = username;
+            document.getElementById('edit-incharge-phone').value = phone || '';
+            document.getElementById('edit-incharge-password').value = '';
+            
+            const modal = new bootstrap.Modal(document.getElementById('editInchargeModal'));
+            modal.show();
+        }
+
+        // Update Incharge
+        document.getElementById('updateInchargeBtn').addEventListener('click', async () => {
+            const id = document.getElementById('edit-incharge-id').value;
+            const name = document.getElementById('edit-incharge-name').value;
+            const username = document.getElementById('edit-incharge-username').value;
+            const phone = document.getElementById('edit-incharge-phone').value;
+            const password = document.getElementById('edit-incharge-password').value;
+            
+            try {
+                const data = {
+                    name,
+                    username,
+                    phone
+                };
+                
+                if (password) {
+                    data.password = password;
+                }
+                
+                const response = await fetch(`${API_URL}/users/${id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': getAuthHeader()
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    bootstrap.Modal.getInstance(document.getElementById('editInchargeModal')).hide();
+                    loadIncharge();
+                } else {
+                    const responseData = await response.json();
+                    alert(responseData.message || 'Error updating site incharge');
+                }
+            } catch (error) {
+                console.error('Error updating site incharge:', error);
+                alert('Error updating site incharge');
+            }
+        });
+
+        // Remove Foremen from Site
+        async function removeForemenFromSite(foremenId, foremenName, siteId, siteName) {
+            if (!confirm(`Are you sure you want to remove ${foremenName} from ${siteName}?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/sites/${siteId}/foremen/${foremenId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': getAuthHeader()
+                    }
+                });
+
+                if (response.ok) {
+                    loadSites();
+                    alert(`${foremenName} has been removed from ${siteName}`);
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Error removing foremen from site');
+                }
+            } catch (error) {
+                console.error('Error removing foremen from site:', error);
+                alert('Error removing foremen from site');
+            }
+        }
+
+        // Delete Site
+        async function deleteSite(siteId, siteName) {
+            if (!confirm(`Are you sure you want to delete the site "${siteName}"?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/sites/${siteId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': getAuthHeader()
+                    }
+                });
+
+                if (response.ok) {
+                    loadSites();
+                    alert(`Site "${siteName}" deleted successfully`);
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Error deleting site');
+                }
+            } catch (error) {
+                console.error('Error deleting site:', error);
+                alert('Error deleting site: ' + error.message);
+            }
+        }
+        
+        // Add Foremen to Site
+        function addForemenToSite(siteId, siteName) {
+            // Store site ID and name
+            document.getElementById('assign-site-id').value = siteId;
+            document.getElementById('assign-site-name').textContent = siteName;
+            
+            // Load available foremen
+            loadAvailableForemen(siteId);
+            
+            // Show the modal
+            const modal = new bootstrap.Modal(document.getElementById('assignForemenModal'));
+            modal.show();
+        }
+        
+        // Load available foremen for assignment
+        async function loadAvailableForemen(siteId) {
+            try {
+                const response = await fetch(`${API_URL}/users?role=site_manager`, {
+                    headers: {
+                        'Authorization': getAuthHeader()
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load foremen');
+                }
+                
+                const data = await response.json();
+                const dropdown = document.getElementById('assign-foremen');
+                dropdown.innerHTML = '<option value="">Select a foremen</option>';
+                
+                // Get current site to check for already assigned foremen
+                const siteResponse = await fetch(`${API_URL}/sites/${siteId}`, {
+                    headers: {
+                        'Authorization': getAuthHeader()
+                    }
+                });
+                
+                if (!siteResponse.ok) {
+                    throw new Error('Failed to load site data');
+                }
+                
+                const siteData = await siteResponse.json();
+                const site = siteData.data.site;
+                
+                // Current primary manager ID
+                const primaryManagerId = site.siteManager ? site.siteManager._id : null;
+                
+                // List of additional foremen IDs
+                const additionalForemenIds = site.additionalForemen 
+                    ? site.additionalForemen.map(f => f._id)
+                    : [];
+                
+                // Filter out already assigned foremen
+                data.data.users.forEach(foreman => {
+                    if (foreman.role === 'site_manager' && 
+                        foreman._id !== primaryManagerId && 
+                        !additionalForemenIds.includes(foreman._id)) {
+                        const option = document.createElement('option');
+                        option.value = foreman._id;
+                        option.textContent = foreman.name;
+                        dropdown.appendChild(option);
+                    }
+                });
+                
+                // If no available foremen
+                if (dropdown.options.length === 1) {
+                    const option = document.createElement('option');
+                    option.disabled = true;
+                    option.textContent = 'No available foremen to assign';
+                    dropdown.appendChild(option);
+                }
+            } catch (error) {
+                console.error('Error loading available foremen:', error);
+                alert('Error loading available foremen: ' + error.message);
+            }
+        }
+        
+        // Assign Foremen button click handler
+        document.getElementById('assignForemenBtn').addEventListener('click', async () => {
+            const siteId = document.getElementById('assign-site-id').value;
+            const foremenId = document.getElementById('assign-foremen').value;
+            const siteName = document.getElementById('assign-site-name').textContent;
+            
+            if (!foremenId) {
+                alert('Please select a foremen to assign');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/sites/${siteId}/foremen`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': getAuthHeader()
+                    },
+                    body: JSON.stringify({ foremenId })
+                });
+
+                if (response.ok) {
+                    bootstrap.Modal.getInstance(document.getElementById('assignForemenModal')).hide();
+                    loadSites();
+                    alert('Foremen assigned to site successfully');
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Error assigning foremen to site');
+                }
+            } catch (error) {
+                console.error('Error assigning foremen:', error);
+                alert('Error assigning foremen: ' + error.message);
+            }
+        });
+    </script>
+    
+    <script>
+        // Load user profile data
+        function loadUserProfile() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            
+            if (user) {
+                // Fill profile form
+                document.getElementById('profile-name').value = user.name || '';
+                document.getElementById('profile-email').value = user.email || '';
+                document.getElementById('profile-phone').value = user.phone || '';
+                document.getElementById('profile-role').value = user.role || 'admin';
+                document.getElementById('profile-username').value = user.username || '';
+                
+                // Update profile display
+                document.getElementById('profile-display-name').textContent = user.name || 'Admin User';
+                document.getElementById('profile-display-email').textContent = user.email || '';
+                
+                // Set last login time
+                const lastLogin = localStorage.getItem('lastLogin');
+                if (lastLogin) {
+                    document.getElementById('last-login-time').textContent = new Date(lastLogin).toLocaleString();
+                } else {
+                    document.getElementById('last-login-time').textContent = 'Today';
+                }
+            }
+            
+            // Add event listener for profile update
+            document.getElementById('update-profile-btn').addEventListener('click', updateProfile);
+            
+            // Add event listener for password change
+            document.getElementById('change-password-btn').addEventListener('click', changePassword);
+        }
+        
+        // Update profile
+        async function updateProfile() {
+            try {
+                const user = JSON.parse(localStorage.getItem('user'));
+                
+                if (!user || !user.id) {  // Changed from user._id to user.id
+                    throw new Error('User information not found');
+                }
+                
+                const name = document.getElementById('profile-name').value.trim();
+                const phone = document.getElementById('profile-phone').value.trim();
+                const username = document.getElementById('profile-username').value.trim();
+                
+                if (!name) {
+                    alert('Name is required');
+                    return;
+                }
+                
+                // Get update button and show loading state
+                const updateBtn = document.getElementById('update-profile-btn');
+                const originalBtnText = updateBtn.innerHTML;
+                updateBtn.disabled = true;
+                updateBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+                
+                // Prepare request data
+                const requestData = {
+                    name,
+                    phone,
+                    username
+                };
+                
+                const response = await fetch(`${API_URL}/users/${user.id}`, {  // Changed from user._id to user.id
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': getAuthHeader()
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const data = await response.json();
+                console.log('Profile update response:', data);
+                
+                if (response.ok && data.status === 'success') {
+                    // Update user data in local storage
+                    Object.assign(user, {
+                        name: data.data.user.name,
+                        phone: data.data.user.phone,
+                        username: data.data.user.username
+                    });
+                    
+                    localStorage.setItem('user', JSON.stringify(user));
+                    
+                    // Update displayed name
+                    document.getElementById('profile-display-name').textContent = user.name;
+                    
+                    alert('Profile updated successfully');
+                } else {
+                    throw new Error(data.message || 'Failed to update profile');
+                }
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                alert('Error updating profile: ' + error.message);
+            } finally {
+                // Reset button state
+                const updateBtn = document.getElementById('update-profile-btn');
+                updateBtn.disabled = false;
+                updateBtn.innerHTML = '<i class="bi bi-save me-1"></i> Save Changes';
+            }
+        }
+         
+         // Change password
+         async function changePassword() {
+             const passwordBtn = document.getElementById('change-password-btn');
+             
+             try {
+                 const currentPassword = document.getElementById('current-password').value;
+                 const newPassword = document.getElementById('new-password').value;
+                 const confirmPassword = document.getElementById('confirm-password').value;
+                 
+                 // Basic validation
+                 if (!currentPassword || !newPassword || !confirmPassword) {
+                     alert('All password fields are required');
+                     return;
+                 }
+                 
+                 if (newPassword !== confirmPassword) {
+                     alert('New passwords do not match');
+                     return;
+                 }
+                 
+                 // Show loading state
+                 passwordBtn.disabled = true;
+                 passwordBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Updating...';
+                 
+                 // Get user info and handle the different ID formats
+                 let userData = localStorage.getItem('user');
+                 try {
+                     const user = JSON.parse(userData || '{}');
+                     console.log('User object from localStorage:', user);
+                     
+                     if (!user) {
+                         throw new Error('User information not found. Please log in again.');
+                     }
+                     
+                     const userId = user.id;
+                     console.log('Using user ID:', userId);
+                     
+                     if (!userId) {
+                         console.error('User object missing ID property:', user);
+                         throw new Error('User ID not found. Please log in again.');
+                     }
+                     
+                     const response = await fetch(`/api/users/${userId}/change-password`, {
+                         method: 'POST',
+                         headers: {
+                             'Content-Type': 'application/json',
+                             'Authorization': getAuthHeader()
+                         },
+                         body: JSON.stringify({
+                             currentPassword,
+                             newPassword
+                         })
+                     });
+                     
+                     if (!response.ok) {
+                         const errorData = await response.json();
+                         throw new Error(errorData.message || 'Failed to update password');
+                     }
+                     
+                     // Clear the form
+                     document.getElementById('current-password').value = '';
+                     document.getElementById('new-password').value = '';
+                     document.getElementById('confirm-password').value = '';
+                     
+                     alert('Password updated successfully! Please log in with your new password.');
+                     
+                     // Log out the user
+                     logout();
+                     
+                 } catch (error) {
+                     console.error('Password change error:', error);
+                     alert(error.message || 'Error changing password');
+                 } finally {
+                     // Reset button state
+                     passwordBtn.disabled = false;
+                     passwordBtn.innerHTML = '<i class="bi bi-shield-lock me-1"></i> Update Password';
+                 }
+             } catch (error) {
+                 console.error('Error changing password:', error);
+                 alert('Error changing password: ' + error.message);
+             }
+        }
+    </script>
+</body>
+</html> 
