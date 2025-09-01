@@ -7,7 +7,7 @@ exports.markInTime = async (req, res) => {
   try {
     const { workerId, siteId } = req.body;
     const inTime = new Date();
-    
+
     // Check if worker exists and belongs to the site
     const worker = await Worker.findOne({ _id: workerId, assignedSite: siteId });
     if (!worker) {
@@ -82,30 +82,52 @@ exports.markOutTime = async (req, res) => {
 // Add attendance manually (for site managers)
 exports.addAttendance = async (req, res) => {
   try {
-    const { workerId, siteId, date, status, checkIn, checkOut } = req.body;
-    
-    if (!workerId || !siteId) {
-      return res.status(400).json({ status: 'error', message: 'workerId and siteId are required' });
+    const {
+      workerId,
+      worker,
+      siteId,
+      site,
+      date,
+      status,
+      checkIn,
+      checkOut,
+      inTime,
+      outTime,
+      workingHours,
+      submittedToIncharge,
+      submissionTimestamp,
+      verified,
+      hajiriPA,
+      hajiriX,
+      hajiriY
+    } = req.body;
+
+    // Handle both workerId and worker field names
+    const finalWorkerId = workerId || worker;
+    const finalSiteId = siteId || site;
+
+    if (!finalWorkerId || !finalSiteId) {
+      return res.status(400).json({ status: 'error', message: 'worker and site are required' });
     }
-    
+
     // Check if worker exists and belongs to the site
-    const worker = await Worker.findById(workerId);
-    if (!worker) {
+    const workerDoc = await Worker.findById(finalWorkerId);
+    if (!workerDoc) {
       return res.status(404).json({ message: 'Worker not found' });
     }
 
-    const site = await Site.findById(siteId);
-    if (!site) {
+    const siteDoc = await Site.findById(finalSiteId);
+    if (!siteDoc) {
       return res.status(404).json({ message: 'Site not found' });
     }
 
     // Parse date string to Date object
     const attendanceDate = new Date(date);
     attendanceDate.setHours(0, 0, 0, 0);
-    
+
     // Check for existing attendance on the same date
     const existingAttendance = await Attendance.findOne({
-      worker: workerId,
+      worker: finalWorkerId,
       date: {
         $gte: attendanceDate,
         $lt: new Date(attendanceDate.getTime() + 24 * 60 * 60 * 1000)
@@ -113,48 +135,71 @@ exports.addAttendance = async (req, res) => {
     });
 
     if (existingAttendance) {
-      return res.status(400).json({ 
+      return res.status(409).json({
         status: 'error',
-        message: 'Attendance already exists for this worker on the selected date' 
+        message: 'Attendance already exists for this worker on the selected date'
+      });
+    }
+
+    // Don't save absent records to database - only present records
+    if (status === 'absent') {
+      return res.status(200).json({
+        status: 'success',
+        message: 'Absent record not saved - only present records are stored',
+        data: null
       });
     }
 
     // Create new attendance record
     const attendance = new Attendance({
-      worker: workerId,
-      site: siteId,
+      worker: finalWorkerId,
+      site: finalSiteId,
       date: attendanceDate,
       status: status || 'present',
-      markedBy: req.user._id
+      markedBy: req.user._id,
+      workingHours: workingHours || 0,
+      hajiriX: hajiriX || 0,
+      hajiriY: hajiriY || 0,
+      submittedToIncharge: submittedToIncharge || false,
+      verified: verified || false
     });
 
-    // Add check-in time if provided
-    if (checkIn) {
-      const [hours, minutes] = checkIn.split(':').map(Number);
-      const inTime = new Date(attendanceDate);
-      inTime.setHours(hours, minutes, 0, 0);
-      attendance.inTime = inTime;
+    // Add submission timestamp if provided
+    if (submissionTimestamp) {
+      attendance.submissionTimestamp = new Date(submissionTimestamp);
     }
 
-    // Add check-out time if provided
+    // Add check-in time if provided (either from checkIn or inTime)
+    if (checkIn) {
+      const [hours, minutes] = checkIn.split(':').map(Number);
+      const inTimeDate = new Date(attendanceDate);
+      inTimeDate.setHours(hours, minutes, 0, 0);
+      attendance.inTime = inTimeDate;
+    } else if (inTime) {
+      attendance.inTime = new Date(inTime);
+    }
+
+    // Add check-out time if provided (either from checkOut or outTime)
     if (checkOut) {
       const [hours, minutes] = checkOut.split(':').map(Number);
-      const outTime = new Date(attendanceDate);
-      outTime.setHours(hours, minutes, 0, 0);
-      attendance.outTime = outTime;
+      const outTimeDate = new Date(attendanceDate);
+      outTimeDate.setHours(hours, minutes, 0, 0);
+      attendance.outTime = outTimeDate;
+    } else if (outTime) {
+      attendance.outTime = new Date(outTime);
     }
 
     await attendance.save();
-    
+
     res.status(201).json({
       status: 'success',
       data: attendance
     });
   } catch (error) {
-    res.status(500).json({ 
+    res.status(500).json({
       status: 'error',
-      message: 'Error adding attendance record', 
-      error: error.message 
+      message: 'Error adding attendance record',
+      error: error.message
     });
   }
 };
@@ -186,10 +231,10 @@ exports.getSiteAttendance = async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ 
+    res.status(500).json({
       status: 'error',
-      message: 'Error fetching attendance', 
-      error: error.message 
+      message: 'Error fetching attendance',
+      error: error.message
     });
   }
 };
@@ -198,13 +243,13 @@ exports.getSiteAttendance = async (req, res) => {
 exports.getDateAttendance = async (req, res) => {
   try {
     const { date } = req.params;
-    
+
     const startDate = new Date(date);
     startDate.setHours(0, 0, 0, 0);
     const endDate = new Date(startDate);
     endDate.setDate(endDate.getDate() +
-    1);
-    
+      1);
+
     const query = {
       date: { $gte: startDate, $lt: endDate }
     };
@@ -220,10 +265,10 @@ exports.getDateAttendance = async (req, res) => {
       data: attendance
     });
   } catch (error) {
-    res.status(500).json({ 
+    res.status(500).json({
       status: 'error',
-      message: 'Error fetching attendance', 
-      error: error.message 
+      message: 'Error fetching attendance',
+      error: error.message
     });
   }
 };
@@ -252,61 +297,87 @@ exports.getWorkerAttendance = async (req, res) => {
       data: attendance
     });
   } catch (error) {
-    res.status(500).json({ 
+    res.status(500).json({
       status: 'error',
-      message: 'Error fetching attendance', 
-      error: error.message 
+      message: 'Error fetching attendance',
+      error: error.message
     });
   }
 };
 
-// Update attendance record
+// Update attendance record (new design)
 exports.updateAttendance = async (req, res) => {
   try {
     const { attendanceId } = req.params;
-    const { status, checkIn, checkOut } = req.body;
-    
+    const { status, hajiriX, hajiriY, checkIn, checkOut } = req.body;
+
+    // Verify user is authorized (must be admin or site_incharge)
+    if (req.user.role !== 'admin' && req.user.role !== 'site_incharge') {
+      return res.status(403).json({
+        status: 'error',
+        message: 'You are not authorized to update attendance records'
+      });
+    }
+
     const attendance = await Attendance.findById(attendanceId);
     if (!attendance) {
       return res.status(404).json({
-        status: 'error',
-        message: 'Attendance record not found'
+        status: "error",
+        message: "Attendance record not found"
       });
     }
-    
-    // Update the status if provided
-    if (status) {
-      attendance.status = status;
+
+    // Validate hajiri values if provided
+    if (hajiriX !== undefined && (hajiriX < 0 || hajiriX > 1)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Hajiri X must be 0 or 1"
+      });
     }
-    
-    // Update check-in time if provided
+    if (hajiriY !== undefined && (hajiriY < 0 || hajiriY > 1)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Hajiri Y must be 0 or 1"
+      });
+    }
+
+    // Update status
+    if (status) attendance.status = status;
+
+    // Update hajiri values
+    if (hajiriX !== undefined) attendance.hajiriX = parseInt(hajiriX) || 0;
+    if (hajiriY !== undefined) attendance.hajiriY = parseInt(hajiriY) || 0;
+
+    // Optional: handle check-in/check-out if still needed
     if (checkIn) {
       const attendanceDate = new Date(attendance.date);
-      const [hours, minutes] = checkIn.split(':').map(Number);
+      const [hours, minutes] = checkIn.split(":").map(Number);
       const inTime = new Date(attendanceDate);
       inTime.setHours(hours, minutes, 0, 0);
       attendance.inTime = inTime;
     }
-    
-    // Update check-out time if provided
     if (checkOut) {
       const attendanceDate = new Date(attendance.date);
-      const [hours, minutes] = checkOut.split(':').map(Number);
+      const [hours, minutes] = checkOut.split(":").map(Number);
       const outTime = new Date(attendanceDate);
       outTime.setHours(hours, minutes, 0, 0);
       attendance.outTime = outTime;
     }
-    
+
+    // ❌ Remove workingHours field (don’t save it in DB anymore)
+
     await attendance.save();
-    
+
     res.json({
-      status: 'success',
+      status: "success",
+      message: "Attendance record updated successfully",
       data: attendance
     });
   } catch (error) {
+    console.error("Error updating attendance:", error);
     res.status(500).json({
-      status: 'error',
-      message: 'Error updating attendance record',
+      status: "error",
+      message: "Error updating attendance record",
       error: error.message
     });
   }
@@ -315,12 +386,12 @@ exports.updateAttendance = async (req, res) => {
 // Get all attendance records
 exports.getAllAttendance = async (req, res) => {
   try {
-    const { site, date, worker, verified } = req.query;
+    const { site, date, worker, verified, submittedToIncharge } = req.query;
     const query = {};
 
     if (site) query.site = site;
     if (worker) query.worker = worker;
-    
+
     // Date filtering
     if (date) {
       const startDate = new Date(date);
@@ -335,24 +406,34 @@ exports.getAllAttendance = async (req, res) => {
       query.verified = verified === 'true';
     }
 
+    // Submission status filtering
+    if (submittedToIncharge !== undefined) {
+      query.submittedToIncharge = submittedToIncharge === 'true';
+    }
+
     const attendance = await Attendance.find(query)
       .populate('worker', 'name contact')
       .populate('site', 'name location')
       .populate('markedBy', 'name')
       .populate('verifiedBy', 'name')
       .sort({ date: -1 });
+    const attendanceWithHours = attendance.map(rec => {
+      const obj = rec.toObject();
+      obj.workingHours = (obj.hajiriX * 8) + obj.hajiriY;
+      return obj;
+    });
 
     res.json({
       status: 'success',
       data: {
-        attendance
+        attendance: attendanceWithHours
       }
     });
   } catch (error) {
-    res.status(500).json({ 
+    res.status(500).json({
       status: 'error',
-      message: 'Error fetching attendance records', 
-      error: error.message 
+      message: 'Error fetching attendance records',
+      error: error.message
     });
   }
 };
@@ -361,21 +442,21 @@ exports.getAllAttendance = async (req, res) => {
 exports.getPendingVerificationCount = async (req, res) => {
   try {
     const { site } = req.query;
-    
+
     if (!site) {
       return res.status(400).json({
         status: 'error',
         message: 'Site ID is required'
       });
     }
-    
+
     // Count attendance records that are submitted to incharge but not verified
     const count = await Attendance.countDocuments({
       site,
       submittedToIncharge: true,
       verified: false
     });
-    
+
     res.json({
       status: 'success',
       count
@@ -393,7 +474,7 @@ exports.getPendingVerificationCount = async (req, res) => {
 exports.verifyAttendance = async (req, res) => {
   try {
     const { attendanceIds, note } = req.body;
-    
+
     if (!attendanceIds || !Array.isArray(attendanceIds) || attendanceIds.length === 0) {
       return res.status(400).json({
         status: 'error',
@@ -412,13 +493,13 @@ exports.verifyAttendance = async (req, res) => {
     // Update all attendance records
     const updateResult = await Attendance.updateMany(
       { _id: { $in: attendanceIds }, verified: false },
-      { 
-        $set: { 
+      {
+        $set: {
           verified: true,
           verifiedBy: req.user._id,
           verifiedAt: new Date(),
           verificationNote: note || `Verified by ${req.user.name}`
-        } 
+        }
       }
     );
 
@@ -436,49 +517,13 @@ exports.verifyAttendance = async (req, res) => {
   }
 };
 
-// Reject attendance records
-exports.rejectAttendance = async (req, res) => {
-  try {
-    const { attendanceIds, note } = req.body;
-    
-    if (!attendanceIds || !Array.isArray(attendanceIds) || attendanceIds.length === 0) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'No attendance records specified for rejection'
-      });
-    }
-
-    // Verify user is authorized (must be admin or site_incharge)
-    if (req.user.role !== 'admin' && req.user.role !== 'site_incharge') {
-      return res.status(403).json({
-        status: 'error',
-        message: 'You are not authorized to reject attendance records'
-      });
-    }
-
-    // Find all specified attendance records and delete them
-    const deleteResult = await Attendance.deleteMany({ _id: { $in: attendanceIds } });
-
-    res.json({
-      status: 'success',
-      message: `${deleteResult.deletedCount} attendance records rejected and removed`,
-      deletedCount: deleteResult.deletedCount,
-      note: note || 'No rejection note provided'
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Error rejecting attendance records',
-      error: error.message
-    });
-  }
-};
+// Reject attendance functionality removed - only approve or close options available
 
 // Modify attendance record (for site incharge)
 exports.modifyAttendance = async (req, res) => {
   try {
     const { attendanceId, status, checkIn, checkOut, note } = req.body;
-    
+
     // Verify user is authorized (must be admin or site_incharge)
     if (req.user.role !== 'admin' && req.user.role !== 'site_incharge') {
       return res.status(403).json({
@@ -486,7 +531,7 @@ exports.modifyAttendance = async (req, res) => {
         message: 'You are not authorized to modify attendance records'
       });
     }
-    
+
     const attendance = await Attendance.findById(attendanceId);
     if (!attendance) {
       return res.status(404).json({
@@ -494,12 +539,12 @@ exports.modifyAttendance = async (req, res) => {
         message: 'Attendance record not found'
       });
     }
-    
+
     // Update the status if provided
     if (status) {
       attendance.status = status;
     }
-    
+
     // Update check-in time if provided
     if (checkIn) {
       const attendanceDate = new Date(attendance.date);
@@ -508,7 +553,7 @@ exports.modifyAttendance = async (req, res) => {
       inTime.setHours(hours, minutes, 0, 0);
       attendance.inTime = inTime;
     }
-    
+
     // Update check-out time if provided
     if (checkOut) {
       const attendanceDate = new Date(attendance.date);
@@ -517,15 +562,15 @@ exports.modifyAttendance = async (req, res) => {
       outTime.setHours(hours, minutes, 0, 0);
       attendance.outTime = outTime;
     }
-    
+
     // Mark as verified by the site incharge
     attendance.verified = true;
     attendance.verifiedBy = req.user._id;
     attendance.verifiedAt = new Date();
     attendance.verificationNote = note || `Modified and verified by ${req.user.name}`;
-    
+
     await attendance.save();
-    
+
     res.json({
       status: 'success',
       message: 'Attendance record modified and verified successfully',
@@ -544,23 +589,23 @@ exports.modifyAttendance = async (req, res) => {
 exports.getSitesWithAttendance = async (req, res) => {
   try {
     const { date } = req.query;
-    
+
     if (!date) {
       return res.status(400).json({
         status: 'error',
         message: 'Date is required'
       });
     }
-    
+
     // Parse date
     const startDate = new Date(date);
     startDate.setHours(0, 0, 0, 0);
     const endDate = new Date(startDate);
     endDate.setDate(endDate.getDate() + 1);
-    
+
     // Get all sites
     const sites = await Site.find();
-    
+
     // For each site, get attendance counts and submission details
     const sitesWithAttendance = await Promise.all(sites.map(async (site) => {
       // Count total attendance records for the site on the given date
@@ -569,7 +614,7 @@ exports.getSitesWithAttendance = async (req, res) => {
         date: { $gte: startDate, $lt: endDate },
         submittedToIncharge: true
       });
-      
+
       // Count verified attendance records
       const verifiedCount = await Attendance.countDocuments({
         site: site._id,
@@ -577,7 +622,7 @@ exports.getSitesWithAttendance = async (req, res) => {
         submittedToIncharge: true,
         verified: true
       });
-      
+
       // Get submission timestamp if available
       const latestSubmission = await Attendance.findOne({
         site: site._id,
@@ -585,7 +630,7 @@ exports.getSitesWithAttendance = async (req, res) => {
         submittedToIncharge: true,
         submissionTimestamp: { $exists: true }
       }).sort({ submissionTimestamp: -1 });
-      
+
       return {
         _id: site._id,
         name: site.name,
@@ -595,10 +640,10 @@ exports.getSitesWithAttendance = async (req, res) => {
         submissionTimestamp: latestSubmission ? latestSubmission.submissionTimestamp : null
       };
     }));
-    
+
     // Filter out sites with no attendance
     const filteredSites = sitesWithAttendance.filter(site => site.attendanceCount > 0);
-    
+
     res.json({
       status: 'success',
       data: {

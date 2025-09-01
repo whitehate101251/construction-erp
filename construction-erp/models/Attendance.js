@@ -23,7 +23,7 @@ const attendanceSchema = new mongoose.Schema({
   },
   inTime: {
     type: Date,
-    required: function() {
+    required: function () {
       // inTime is only required if status is present or late
       return this.status === 'present' || this.status === 'late';
     }
@@ -31,9 +31,15 @@ const attendanceSchema = new mongoose.Schema({
   outTime: {
     type: Date
   },
-  workingHours: {
+  hajiriX: {
     type: Number,
-    default: 0
+    default: 0,
+    min: 0
+  },
+  hajiriY: {
+    type: Number,
+    default: 0,
+    min: 0
   },
   markedBy: {
     type: mongoose.Schema.Types.ObjectId,
@@ -69,16 +75,7 @@ const attendanceSchema = new mongoose.Schema({
   }
 });
 
-// Calculate working hours before saving
-attendanceSchema.pre('save', function(next) {
-  if (this.inTime && this.outTime) {
-    const diff = this.outTime - this.inTime;
-    this.workingHours = Math.round(diff / (1000 * 60 * 60) * 10) / 10; // Round to 1 decimal place
-  }
-  next();
-});
-
 // Compound index to ensure unique attendance records per worker per day
 attendanceSchema.index({ worker: 1, date: 1 }, { unique: true });
 
-module.exports = mongoose.model('Attendance', attendanceSchema); 
+module.exports = mongoose.model('Attendance', attendanceSchema);

@@ -1,5 +1,4 @@
-const API_URL = 'http://localhost:5000';
-
+const API_URL = 'http://localhost:3000';
 // Language settings
 let currentLanguage = localStorage.getItem('language') || 'hi'; // Default to Hindi
 
@@ -17,19 +16,19 @@ const translations = {
         'reports': 'रिपोर्ट',
         'profile': 'प्रोफ़ाइल',
         'logout': 'लॉग आउट',
-        
+
         // Dashboard
         'total_workers': 'कुल मजदूर',
         'present_today': 'आज उपस्थित हैं',
         'attendance_btn': 'हाज़िरी',
-        
+
         // Workers
         'add_worker_btn': 'श्रमिक जोड़ें',
         'name': 'नाम',
         'father_name': 'पिता का नाम',
         'phone': 'फ़ोन',
         'actions': 'कार्रवाई',
-        
+
         // Attendance
         'attendance_management': 'हाज़िरी प्रबंधन',
         'in_time': 'इन टाइम',
@@ -37,12 +36,12 @@ const translations = {
         'hours': 'घंटे',
         'hajiri': 'हाज़िरी',
         'save_changes': 'बदलाव सहेजें',
-        
+
         // Time Picker
         'ok': 'ठीक है',
         'next': 'आगे',
         'prev': 'पीछे',
-        
+
         // Status
         'present': 'उपस्थित',
         'absent': 'अनुपस्थित',
@@ -60,19 +59,19 @@ const translations = {
         'reports': 'Reports',
         'profile': 'Profile',
         'logout': 'Logout',
-        
+
         // Dashboard
         'total_workers': 'Total Workers',
         'present_today': 'Present Today',
         'attendance_btn': 'Attendance',
-        
+
         // Workers
         'add_worker_btn': 'Add Worker',
         'name': 'Name',
         'father_name': 'Father\'s Name',
         'phone': 'Phone',
         'actions': 'Actions',
-        
+
         // Attendance
         'attendance_management': 'Attendance Management',
         'in_time': 'In Time',
@@ -80,12 +79,12 @@ const translations = {
         'hours': 'Hours',
         'hajiri': 'Hajiri',
         'save_changes': 'Save Changes',
-        
+
         // Time Picker
         'ok': 'OK',
         'next': 'Next',
         'prev': 'Previous',
-        
+
         // Status
         'present': 'Present',
         'absent': 'Absent',
@@ -112,11 +111,11 @@ function updateLanguage() {
         currentLanguage = 'hi'; // Fallback to Hindi
         localStorage.setItem('language', currentLanguage); // Update localStorage with corrected value
     }
-    
+
     // Update language button text
     const langBtn = document.querySelector('.current-lang');
     if (langBtn) langBtn.textContent = currentLanguage === 'hi' ? 'हिंदी' : 'English';
-    
+
     // Update navigation items
     const navOverview = document.querySelector('[data-section="overview-section"] .nav-text');
     if (navOverview && translations[currentLanguage] && translations[currentLanguage]['home']) navOverview.textContent = translations[currentLanguage]['home'];
@@ -130,7 +129,7 @@ function updateLanguage() {
     if (navProfile && translations[currentLanguage] && translations[currentLanguage]['profile']) navProfile.textContent = translations[currentLanguage]['profile'];
     const navLogout = document.querySelector('.logout-button .nav-text');
     if (navLogout && translations[currentLanguage] && translations[currentLanguage]['logout']) navLogout.textContent = translations[currentLanguage]['logout'];
-    
+
     // Update dashboard stats
     const stat1 = document.querySelector('.stats-card:nth-child(1) p');
     if (stat1 && translations[currentLanguage] && translations[currentLanguage]['total_workers']) stat1.textContent = translations[currentLanguage]['total_workers'];
@@ -138,19 +137,19 @@ function updateLanguage() {
     if (stat2 && translations[currentLanguage] && translations[currentLanguage]['present_today']) stat2.textContent = translations[currentLanguage]['present_today'];
     const attBtn = document.querySelector('.attendance-btn');
     if (attBtn && translations[currentLanguage] && translations[currentLanguage]['attendance_btn']) attBtn.textContent = translations[currentLanguage]['attendance_btn'];
-    
+
     // Update workers section
     const workersHeader = document.querySelector('#workers-section h2');
     if (workersHeader && translations[currentLanguage] && translations[currentLanguage]['add_worker']) workersHeader.textContent = translations[currentLanguage]['add_worker'];
     const addWorkerBtn = document.querySelector('#workers-section .btn-primary');
     if (addWorkerBtn && translations[currentLanguage] && translations[currentLanguage]['add_worker_btn']) addWorkerBtn.textContent = translations[currentLanguage]['add_worker_btn'];
-    
+
     // Update attendance section
     const attendanceHeader = document.querySelector('#attendance-section h2');
     if (attendanceHeader && translations[currentLanguage] && translations[currentLanguage]['attendance_management']) attendanceHeader.textContent = translations[currentLanguage]['attendance_management'];
     const saveBtn = document.getElementById('save-all-attendance');
     if (saveBtn && translations[currentLanguage] && translations[currentLanguage]['save_changes']) saveBtn.textContent = translations[currentLanguage]['save_changes'];
-    
+
     // Update table headers
     const tableHeaders = document.querySelectorAll('#attendance-table th');
     if (tableHeaders.length >= 6) {
@@ -166,9 +165,9 @@ function updateLanguage() {
 // Call updateLanguage on page load
 document.addEventListener('DOMContentLoaded', () => {
     updateLanguage();
-    
+
     // Remove auto-backup timer
-    
+
     // ... rest of your existing DOMContentLoaded code ...
 });
 
@@ -194,7 +193,7 @@ function logout() {
     // Clear stored data
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    
+
     // Redirect to login page
     window.location.href = '/login.html';
 }
@@ -203,25 +202,25 @@ function logout() {
 function checkAuth() {
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    
+
     if (!token) {
         window.location.href = '/login.html';
         return;
     }
-    
+
     // Set the user's name in the sidebar
     if (user && user.name) {
         document.getElementById('foreman-name').textContent = user.name;
     } else {
         document.getElementById('foreman-name').textContent = 'Foreman';
     }
-    
+
     // Check role
     if (user.role !== 'site_manager') {
         console.warn('User is not a site manager, role:', user.role);
         // Allow access anyway for now, since we don't have a verification endpoint
     }
-    
+
     // Store user in global variable with proper ID handling
     if (user && Object.keys(user).length > 0) {
         // Fix the ID issue - API returns 'id' but code expects '_id'
@@ -229,7 +228,7 @@ function checkAuth() {
             ...user,
             _id: user._id || user.id  // Use _id if available, otherwise use id
         };
-        
+
         // Log the user information for debugging
         console.log('User authenticated:', currentUser.name || 'Unknown user');
         console.log('User ID:', currentUser._id);
@@ -238,38 +237,38 @@ function checkAuth() {
         // Initialize a minimal user object to prevent errors
         currentUser = { _id: null, name: 'Unknown User', role: 'guest' };
     }
-    
+
     // Try to load sites as a simple way to verify the token is still valid
     fetch('/api/sites', {
         headers: {
             'Authorization': `Bearer ${token}`
         }
     })
-    .then(response => {
-        if (!response.ok) {
-            if (response.status === 401 || response.status === 403) {
-                // Unauthorized - token is invalid
-                throw new Error('Token invalid or expired');
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 401 || response.status === 403) {
+                    // Unauthorized - token is invalid
+                    throw new Error('Token invalid or expired');
+                }
+                // Other errors - might be server issue, continue anyway
+                console.warn('Site fetch failed but continuing:', response.status);
             }
-            // Other errors - might be server issue, continue anyway
-            console.warn('Site fetch failed but continuing:', response.status);
-        }
-        return response;
-    })
-    .then(() => {
-        // Continue loading data regardless of response
-        loadDashboardData();
-    })
-    .catch(error => {
-        console.error('Error checking auth:', error);
-        if (error.message === 'Token invalid or expired') {
-            // Only redirect for auth errors
-            window.location.href = '/login.html';
-        } else {
-            // For other errors, try to continue
+            return response;
+        })
+        .then(() => {
+            // Continue loading data regardless of response
             loadDashboardData();
-        }
-    });
+        })
+        .catch(error => {
+            console.error('Error checking auth:', error);
+            if (error.message === 'Token invalid or expired') {
+                // Only redirect for auth errors
+                window.location.href = '/login.html';
+            } else {
+                // For other errors, try to continue
+                loadDashboardData();
+            }
+        });
 }
 
 // Load all dashboard data
@@ -279,9 +278,9 @@ function loadDashboardData() {
             return loadWorkers();
         })
         .then(() => {
-    loadOverviewStats();
-    loadProfileData();
-            
+            loadOverviewStats();
+            loadProfileData();
+
             // Check if we're on the attendance section and load attendance data
             const attendanceSection = document.getElementById('attendance-section');
             if (attendanceSection && attendanceSection.classList.contains('active')) {
@@ -301,11 +300,11 @@ async function loadSites() {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         });
-        
+
         if (!response.ok) {
             throw new Error('Failed to load sites');
         }
-        
+
         const data = await response.json();
         sites = data.data.sites.filter(site => {
             // Include sites where the foreman is either:
@@ -313,10 +312,10 @@ async function loadSites() {
             // 2. In the additional foremen list
             // 3. Under a site incharge who manages this site
             return site.siteManager?._id === currentUser._id ||
-                   (site.additionalForemen || []).some(f => f._id === currentUser._id) ||
-                   site.siteIncharge?._id === currentUser._id;
+                (site.additionalForemen || []).some(f => f._id === currentUser._id) ||
+                site.siteIncharge?._id === currentUser._id;
         });
-        
+
         console.log('Loaded sites:', sites);
         return sites;
     } catch (error) {
@@ -378,18 +377,18 @@ function loadOverviewStats() {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            const presentToday = data.data.filter(record => 
-                record.status === 'present' && 
-                sites.some(site => site._id === record.site)
-            ).length;
-            const presentTodayElem = document.getElementById('present-today');
-            if (presentTodayElem) presentTodayElem.textContent = presentToday;
-        }
-    })
-    .catch(error => console.error('Error:', error));
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const presentToday = data.data.filter(record =>
+                    record.status === 'present' &&
+                    sites.some(site => site._id === record.site)
+                ).length;
+                const presentTodayElem = document.getElementById('present-today');
+                if (presentTodayElem) presentTodayElem.textContent = presentToday;
+            }
+        })
+        .catch(error => console.error('Error:', error));
 }
 
 // Load profile data
@@ -433,13 +432,13 @@ function updateWorkersTable() {
         return;
     }
     tbody.innerHTML = '';
-    
+
     // Make sure translations exist
-    const notAvailableText = translations[currentLanguage] && translations[currentLanguage]['not_available'] ? 
+    const notAvailableText = translations[currentLanguage] && translations[currentLanguage]['not_available'] ?
         translations[currentLanguage]['not_available'] : 'Not Available';
     const unnamedText = translations[currentLanguage] && translations[currentLanguage]['unnamed'] ?
         translations[currentLanguage]['unnamed'] : 'Unnamed';
-        
+
     workers.forEach(worker => {
         try {
             // Safety check for worker data
@@ -447,7 +446,7 @@ function updateWorkersTable() {
                 console.error('Invalid worker data:', worker);
                 return;
             }
-            
+
             const phone = worker.contact?.phone || worker.phone || notAvailableText;
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -519,35 +518,35 @@ function addWorker() {
         },
         body: JSON.stringify(formData)
     })
-    .then(response => {
-        console.log('Raw add worker response:', response);
-        return response.json();
-    })
-    .then(data => {
-        console.log('Add worker response data:', data);
-        if (data.status === 'success') {
-            bootstrap.Modal.getInstance(document.getElementById('addWorkerModal')).hide();
-            
-            // Manually add the new worker to the array before reloading
-            if (data.data && data.data._id) {
-                workers.push(data.data);
-                updateWorkersTable();
+        .then(response => {
+            console.log('Raw add worker response:', response);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Add worker response data:', data);
+            if (data.status === 'success') {
+                bootstrap.Modal.getInstance(document.getElementById('addWorkerModal')).hide();
+
+                // Manually add the new worker to the array before reloading
+                if (data.data && data.data._id) {
+                    workers.push(data.data);
+                    updateWorkersTable();
+                }
+
+                // Then reload all workers to ensure consistency
+                setTimeout(() => {
+                    loadWorkers();
+                    loadOverviewStats();
+                }, 500);
+            } else {
+                // Show the error message from the server
+                alert(data.message || 'Error adding worker');
             }
-            
-            // Then reload all workers to ensure consistency
-            setTimeout(() => {
-                loadWorkers();
-                loadOverviewStats();
-            }, 500);
-        } else {
-            // Show the error message from the server
-            alert(data.message || 'Error adding worker');
-        }
-    })
-    .catch(error => {
-        console.error('Error adding worker:', error);
-        alert('Network error. Please try again later.');
-    });
+        })
+        .catch(error => {
+            console.error('Error adding worker:', error);
+            alert('Network error. Please try again later.');
+        });
 }
 
 // Edit worker
@@ -558,13 +557,13 @@ function editWorker(workerId) {
         alert('Worker not found');
         return;
     }
-    
+
     // Fill the form with worker data
     document.getElementById('edit-worker-id').value = worker._id;
     document.getElementById('edit-worker-name').value = worker.name || '';
     document.getElementById('edit-worker-father-name').value = worker.fatherName || '';
     document.getElementById('edit-worker-phone').value = worker.contact?.phone || worker.phone || '';
-    
+
     // Show the modal
     const modal = new bootstrap.Modal(document.getElementById('editWorkerModal'));
     modal.show();
@@ -573,20 +572,20 @@ function editWorker(workerId) {
 // Update worker
 function updateWorker() {
     const workerId = document.getElementById('edit-worker-id').value;
-    
+
     const formData = {
         name: document.getElementById('edit-worker-name').value,
         fatherName: document.getElementById('edit-worker-father-name').value || '',
         phone: document.getElementById('edit-worker-phone').value || '',
         role: 'laborer' // Default role
     };
-    
+
     // Validate form data - only name is required
     if (!formData.name) {
         alert('Worker name is required');
         return;
     }
-    
+
     fetch(`/api/workers/${workerId}`, {
         method: 'PATCH',
         headers: {
@@ -595,21 +594,21 @@ function updateWorker() {
         },
         body: JSON.stringify(formData)
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            bootstrap.Modal.getInstance(document.getElementById('editWorkerModal')).hide();
-            loadWorkers();
-            loadOverviewStats();
-        } else {
-            // Show the error message from the server
-            alert(data.message || 'Error updating worker');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Network error. Please try again later.');
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                bootstrap.Modal.getInstance(document.getElementById('editWorkerModal')).hide();
+                loadWorkers();
+                loadOverviewStats();
+            } else {
+                // Show the error message from the server
+                alert(data.message || 'Error updating worker');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Network error. Please try again later.');
+        });
 }
 
 // Delete worker
@@ -626,61 +625,61 @@ function deleteWorker(workerId) {
             return;
         }
     }
-    
+
     // Show loading state
     const deleteBtn = document.querySelector(`button[onclick="deleteWorker('${workerId}')"]`);
     if (deleteBtn) {
         deleteBtn.disabled = true;
         deleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Deleting...';
     }
-    
+
     fetch(`/api/workers/${workerId}`, {
         method: 'DELETE',
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.status === 'success') {
-            // If called from the modal, close it
-            const modal = bootstrap.Modal.getInstance(document.getElementById('editWorkerModal'));
-            if (modal) {
-                modal.hide();
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
-            // Remove the worker row from the table
-            const workerRow = document.querySelector(`tr[data-worker-id="${workerId}"]`);
-            if (workerRow) {
-                workerRow.remove();
+            return response.json();
+        })
+        .then(data => {
+            if (data.status === 'success') {
+                // If called from the modal, close it
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editWorkerModal'));
+                if (modal) {
+                    modal.hide();
+                }
+
+                // Remove the worker row from the table
+                const workerRow = document.querySelector(`tr[data-worker-id="${workerId}"]`);
+                if (workerRow) {
+                    workerRow.remove();
+                }
+
+                // Reload the workers list and stats
+                loadWorkers();
+                loadOverviewStats();
+
+                // Show success message
+                showToast('Worker deleted successfully', 'success');
+            } else {
+                throw new Error(data.message || 'Error deleting worker');
             }
-            
-            // Reload the workers list and stats
-            loadWorkers();
-            loadOverviewStats();
-            
-            // Show success message
-            showToast('Worker deleted successfully', 'success');
-        } else {
-            throw new Error(data.message || 'Error deleting worker');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showToast(error.message || 'Network error. Please try again later.', 'error');
-    })
-    .finally(() => {
-        // Reset button state
-        if (deleteBtn) {
-            deleteBtn.disabled = false;
-            deleteBtn.innerHTML = '<i class="bi bi-trash"></i>';
-        }
-    });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast(error.message || 'Network error. Please try again later.', 'error');
+        })
+        .finally(() => {
+            // Reset button state
+            if (deleteBtn) {
+                deleteBtn.disabled = false;
+                deleteBtn.innerHTML = '<i class="bi bi-trash"></i>';
+            }
+        });
 }
 
 // Helper function to show toast messages
@@ -691,7 +690,7 @@ function showToast(message, type = 'info') {
     toast.setAttribute('role', 'alert');
     toast.setAttribute('aria-live', 'assertive');
     toast.setAttribute('aria-atomic', 'true');
-    
+
     toast.innerHTML = `
         <div class="d-flex">
             <div class="toast-body">
@@ -700,11 +699,11 @@ function showToast(message, type = 'info') {
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
         </div>
     `;
-    
+
     toastContainer.appendChild(toast);
     const bsToast = new bootstrap.Toast(toast);
     bsToast.show();
-    
+
     // Remove toast after it's hidden
     toast.addEventListener('hidden.bs.toast', () => {
         toast.remove();
@@ -725,9 +724,9 @@ function loadAttendance() {
     console.log("=== LOADING ATTENDANCE ===");
     console.log("Current workers:", workers);
     console.log("Current sites:", sites);
-    
+
     const date = document.getElementById('attendance-date').value;
-    
+
     // Display the day of the week
     if (date) {
         const selectedDate = new Date(date);
@@ -737,17 +736,17 @@ function loadAttendance() {
     } else {
         document.getElementById('attendance-day-display').textContent = 'Today';
     }
-    
+
     // If no date selected, default to today
     const selectedDate = date || new Date().toISOString().split('T')[0];
-    
+
     // Show loading state
     const tbody = document.getElementById('attendance-table');
     if (!tbody) {
         console.error("Attendance table not found!");
         return Promise.reject(new Error("Attendance table not found"));
     }
-    
+
     tbody.innerHTML = `
         <tr>
             <td colspan="7" class="text-center py-3">
@@ -758,10 +757,10 @@ function loadAttendance() {
             </td>
         </tr>
     `;
-    
+
     // Clear attendance records
     attendanceRecords = [];
-    
+
     // CRITICAL FIX: If workers array is empty, we must load workers first
     if (workers.length === 0) {
         console.log("No workers found, loading workers first...");
@@ -794,7 +793,7 @@ function loadAttendanceData(selectedDate, tbody) {
     // Get the manager's site
     const managerSiteId = sites.length > 0 ? sites[0]._id : null;
     console.log("Manager site ID for attendance:", managerSiteId);
-    
+
     if (!managerSiteId) {
         tbody.innerHTML = `
             <tr>
@@ -814,70 +813,70 @@ function loadAttendanceData(selectedDate, tbody) {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
     })
-    .then(response => {
-        if (!response.ok) {
-            console.error("Attendance API returned status:", response.status);
-            throw new Error('Failed to fetch attendance');
-        }
-        return response.text();
-    })
-    .then(text => {
-        // Try to parse as JSON, but handle HTML responses gracefully
-        try {
-            // Check if the response is HTML
-            if (text.trim().toLowerCase().startsWith('<!doctype') || 
-                text.trim().toLowerCase().startsWith('<html')) {
-                console.log('Received HTML response instead of JSON');
-                console.log('This is normal and not an error - the server returned a success status code (200 OK)');
-                // Return a valid object instead of throwing
-                return { 
-                    status: 'success', 
-                    message: 'Saved successfully (HTML response received)',
-                    rawResponse: text.substring(0, 100) + '...' // Just log a snippet
-                };
+        .then(response => {
+            if (!response.ok) {
+                console.error("Attendance API returned status:", response.status);
+                throw new Error('Failed to fetch attendance');
             }
-            
-            // Parse JSON
-            return JSON.parse(text);
-        } catch (e) {
-            console.error('Error parsing attendance response:', e);
-            console.error('Raw response text (first 200 chars):', text.substring(0, 200));
-            // Return empty data to avoid errors
-            return { status: 'success', data: [] };
-        }
-    })
-    .then(attendanceData => {
-        console.log("Attendance data received:", attendanceData);
-        if (attendanceData.status === 'success') {
-            attendanceRecords = Array.isArray(attendanceData.data) ? attendanceData.data :
-                              (attendanceData.data && Array.isArray(attendanceData.data.attendance) ? 
-                               attendanceData.data.attendance : []);
-            
-            console.log(`Processed ${attendanceRecords.length} attendance records`);
-            // Update the table with whatever data we have
-            updateAttendanceTable(workers, selectedDate, managerSiteId);
-            
-            // After updating the table with server data, check for and restore draft data
-            // This ensures drafts are always restored even after page refresh
-            setTimeout(() => {
-                restoreAttendanceFromLocalStorage();
-                
-                // Make sure the load draft button is always visible
-                const loadDraftBtn = document.getElementById('load-draft-btn');
-                if (loadDraftBtn) {
-                    loadDraftBtn.style.display = 'block';
+            return response.text();
+        })
+        .then(text => {
+            // Try to parse as JSON, but handle HTML responses gracefully
+            try {
+                // Check if the response is HTML
+                if (text.trim().toLowerCase().startsWith('<!doctype') ||
+                    text.trim().toLowerCase().startsWith('<html')) {
+                    console.log('Received HTML response instead of JSON');
+                    console.log('This is normal and not an error - the server returned a success status code (200 OK)');
+                    // Return a valid object instead of throwing
+                    return {
+                        status: 'success',
+                        message: 'Saved successfully (HTML response received)',
+                        rawResponse: text.substring(0, 100) + '...' // Just log a snippet
+                    };
                 }
-            }, 500);
-            
-            return attendanceRecords;
-        } else {
-            throw new Error(attendanceData.message || 'Failed to load attendance data');
-        }
-    })
-    .catch(error => {
-        console.error('Error loading attendance:', error);
-        if (tbody) {
-            tbody.innerHTML = `
+
+                // Parse JSON
+                return JSON.parse(text);
+            } catch (e) {
+                console.error('Error parsing attendance response:', e);
+                console.error('Raw response text (first 200 chars):', text.substring(0, 200));
+                // Return empty data to avoid errors
+                return { status: 'success', data: [] };
+            }
+        })
+        .then(attendanceData => {
+            console.log("Attendance data received:", attendanceData);
+            if (attendanceData.status === 'success') {
+                attendanceRecords = Array.isArray(attendanceData.data) ? attendanceData.data :
+                    (attendanceData.data && Array.isArray(attendanceData.data.attendance) ?
+                        attendanceData.data.attendance : []);
+
+                console.log(`Processed ${attendanceRecords.length} attendance records`);
+                // Update the table with whatever data we have
+                updateAttendanceTable(workers, selectedDate, managerSiteId);
+
+                // After updating the table with server data, check for and restore draft data
+                // This ensures drafts are always restored even after page refresh
+                setTimeout(() => {
+                    restoreAttendanceFromLocalStorage();
+
+                    // Make sure the load draft button is always visible
+                    const loadDraftBtn = document.getElementById('load-draft-btn');
+                    if (loadDraftBtn) {
+                        loadDraftBtn.style.display = 'block';
+                    }
+                }, 500);
+
+                return attendanceRecords;
+            } else {
+                throw new Error(attendanceData.message || 'Failed to load attendance data');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading attendance:', error);
+            if (tbody) {
+                tbody.innerHTML = `
                 <tr>
                     <td colspan="7" class="text-center py-3 text-danger">
                         <i class="bi bi-exclamation-triangle me-2"></i>
@@ -885,21 +884,21 @@ function loadAttendanceData(selectedDate, tbody) {
                     </td>
                 </tr>
             `;
-        }
-        
-        // Even if server data fails, try to restore from localStorage
-        setTimeout(() => {
-            restoreAttendanceFromLocalStorage();
-            
-            // Make sure the load draft button is always visible
-            const loadDraftBtn = document.getElementById('load-draft-btn');
-            if (loadDraftBtn) {
-                loadDraftBtn.style.display = 'block';
             }
-        }, 500);
-        
-        return Promise.reject(error);
-    });
+
+            // Even if server data fails, try to restore from localStorage
+            setTimeout(() => {
+                restoreAttendanceFromLocalStorage();
+
+                // Make sure the load draft button is always visible
+                const loadDraftBtn = document.getElementById('load-draft-btn');
+                if (loadDraftBtn) {
+                    loadDraftBtn.style.display = 'block';
+                }
+            }, 500);
+
+            return Promise.reject(error);
+        });
 }
 
 // Enable/disable save button based on confirmation checkbox
@@ -916,7 +915,7 @@ function updateAttendanceTable(siteWorkers, date, siteId) {
         console.error("Attendance table element not found");
         return;
     }
-    
+
     // Add Load Draft button above the table (no more Save Draft button)
     const tableContainer = tbody.closest('.table-responsive');
     if (tableContainer) {
@@ -925,15 +924,15 @@ function updateAttendanceTable(siteWorkers, date, siteId) {
             // Add in/out time fields above the load button
             const timeContainer = document.createElement('div');
             timeContainer.className = 'd-flex justify-content-center mb-3 gap-5';
-            
+
             // In time field
             const inTimeGroup = document.createElement('div');
             inTimeGroup.className = 'd-flex flex-column align-items-center';
-            
+
             const inTimeLabel = document.createElement('div');
             inTimeLabel.className = 'mb-2 fw-bold';
             inTimeLabel.textContent = translations[currentLanguage]['in_time'];
-            
+
             const inTimeInput = document.createElement('div');
             inTimeInput.id = 'global-in-time';
             inTimeInput.className = 'border border-primary rounded p-2 text-center';
@@ -941,18 +940,18 @@ function updateAttendanceTable(siteWorkers, date, siteId) {
             inTimeInput.style.cursor = 'pointer';
             inTimeInput.style.backgroundColor = '#f8f9fa';
             inTimeInput.textContent = '-- : -- --';
-            
+
             inTimeGroup.appendChild(inTimeLabel);
             inTimeGroup.appendChild(inTimeInput);
-            
+
             // Out time field
             const outTimeGroup = document.createElement('div');
             outTimeGroup.className = 'd-flex flex-column align-items-center';
-            
+
             const outTimeLabel = document.createElement('div');
             outTimeLabel.className = 'mb-2 fw-bold';
             outTimeLabel.textContent = translations[currentLanguage]['out_time'];
-            
+
             const outTimeInput = document.createElement('div');
             outTimeInput.id = 'global-out-time';
             outTimeInput.className = 'border border-primary rounded p-2 text-center';
@@ -960,19 +959,19 @@ function updateAttendanceTable(siteWorkers, date, siteId) {
             outTimeInput.style.cursor = 'pointer';
             outTimeInput.style.backgroundColor = '#f8f9fa';
             outTimeInput.textContent = '-- : -- --';
-            
+
             outTimeGroup.appendChild(outTimeLabel);
             outTimeGroup.appendChild(outTimeInput);
-            
+
             timeContainer.appendChild(inTimeGroup);
             timeContainer.appendChild(outTimeGroup);
-            
+
             // Add time picker functionality to in time
-            inTimeInput.addEventListener('click', function() {
-                showWheelTimePicker(this, function(selectedTime) {
+            inTimeInput.addEventListener('click', function () {
+                showWheelTimePicker(this, function (selectedTime) {
                     if (selectedTime) {
                         console.log('In time selected:', selectedTime);
-                        
+
                         // Convert 24h time to 12h format for display
                         const timeDisplay = formatTimeFor12Hour(selectedTime);
                         inTimeInput.textContent = timeDisplay;
@@ -980,13 +979,13 @@ function updateAttendanceTable(siteWorkers, date, siteId) {
                     }
                 });
             });
-            
+
             // Add time picker functionality to out time
-            outTimeInput.addEventListener('click', function() {
-                showWheelTimePicker(this, function(selectedTime) {
+            outTimeInput.addEventListener('click', function () {
+                showWheelTimePicker(this, function (selectedTime) {
                     if (selectedTime) {
                         console.log('Out time selected:', selectedTime);
-                        
+
                         // Convert 24h time to 12h format for display
                         const timeDisplay = formatTimeFor12Hour(selectedTime);
                         outTimeInput.textContent = timeDisplay;
@@ -994,14 +993,14 @@ function updateAttendanceTable(siteWorkers, date, siteId) {
                     }
                 });
             });
-            
+
             // Add the time container first
             tableContainer.insertBefore(timeContainer, tableContainer.firstChild);
-            
+
             // Button container for load button
             const buttonContainer = document.createElement('div');
             buttonContainer.className = 'd-flex justify-content-center mb-3 gap-2';
-            
+
             // Load Draft button (always shown)
             const loadDraftBtn = document.createElement('button');
             loadDraftBtn.id = 'load-draft-btn';
@@ -1009,15 +1008,15 @@ function updateAttendanceTable(siteWorkers, date, siteId) {
             loadDraftBtn.style.padding = '10px 20px'; // Add more padding
             loadDraftBtn.style.fontWeight = 'bold'; // Make text bold
             loadDraftBtn.innerHTML = '<i class="bi bi-cloud-download me-2"></i> लोड करें';
-            loadDraftBtn.onclick = function() {
+            loadDraftBtn.onclick = function () {
                 restoreAttendanceFromLocalStorage();
             };
-            
+
             // Always show the button
             loadDraftBtn.style.display = 'block';
-            
+
             buttonContainer.appendChild(loadDraftBtn);
-            
+
             // Insert button container after time container
             tableContainer.insertBefore(buttonContainer, timeContainer.nextSibling);
         } else {
@@ -1026,7 +1025,7 @@ function updateAttendanceTable(siteWorkers, date, siteId) {
             loadDraftBtn.style.display = 'block';
         }
     }
-    
+
     // Update table headers for language
     const thead = tbody.closest('table').querySelector('thead tr');
     if (thead) {
@@ -1041,7 +1040,7 @@ function updateAttendanceTable(siteWorkers, date, siteId) {
             ths[6].textContent = '';
         }
     }
-    
+
     // Rest of the function remains the same...
     tbody.innerHTML = '';
     if (!siteWorkers || !Array.isArray(siteWorkers)) {
@@ -1052,13 +1051,13 @@ function updateAttendanceTable(siteWorkers, date, siteId) {
         tbody.innerHTML = `<tr><td colspan="7" class="text-center py-3">${translations[currentLanguage]['no_workers_found'] || 'No workers found for this site'}</td></tr>`;
         return;
     }
-    
+
     // Loop through each worker
     siteWorkers.forEach((worker, idx) => {
         if (!worker || !worker._id) return;
         // Find attendance record for this worker, if exists
-        const attendanceRecord = attendanceRecords.find(record => 
-            record && record.worker && 
+        const attendanceRecord = attendanceRecords.find(record =>
+            record && record.worker &&
             (record.worker._id === worker._id || record.worker === worker._id)
         );
         // Hajiri values
@@ -1072,46 +1071,46 @@ function updateAttendanceTable(siteWorkers, date, siteId) {
         const paBtnClass = isPresent ? 'btn-success' : 'btn-danger';
         // Calculate hours as X*8+Y
         const hoursValue = (parseInt(hajiriX) || 0) * 8 + (parseInt(hajiriY) || 0);
-        
+
         // Create the table row
-            const tr = document.createElement('tr');
+        const tr = document.createElement('tr');
         tr.dataset.workerId = worker._id;
         tr.dataset.date = date;
         tr.dataset.siteId = siteId;
-        
+
         // Apply table-secondary class for absent workers
         if (!isPresent) tr.classList.add('table-secondary');
-        
+
         // Create the cells
         const tdSerial = document.createElement('td');
         tdSerial.textContent = serialNumber;
-        
+
         const tdName = document.createElement('td');
         tdName.textContent = worker.name || translations[currentLanguage]['unnamed'] || 'Unnamed';
-        
+
         const tdFatherName = document.createElement('td');
         tdFatherName.textContent = worker.fatherName || translations[currentLanguage]['not_available'] || 'Not Available';
-        
+
         const tdPA = document.createElement('td');
         const paBtn = document.createElement('button');
         paBtn.className = `btn btn-sm ${paBtnClass} pa-toggle-btn`;
         paBtn.textContent = hajiriPA;
         paBtn.setAttribute('onclick', 'togglePAToggle(this)');
         tdPA.appendChild(paBtn);
-        
+
         // Create the hajiri column with proper styling
         const tdHajiri = document.createElement('td');
         tdHajiri.className = 'hajiri-column';
         tdHajiri.style.padding = '0';
         tdHajiri.style.height = '46px'; // Fixed height for the cell
-        
+
         // Create a container div to hold the XPY inputs
         const hajiriContainer = document.createElement('div');
         hajiriContainer.className = 'd-flex align-items-center justify-content-center gap-2 h-100';
         hajiriContainer.style.height = '100%';
         hajiriContainer.style.padding = '0';
         hajiriContainer.style.backgroundColor = isPresent ? '#fff' : '#f8f9fa';
-        
+
         // Create X input with proper styling
         const xInput = document.createElement('input');
         xInput.type = 'text';
@@ -1130,14 +1129,14 @@ function updateAttendanceTable(siteWorkers, date, siteId) {
         xInput.style.padding = '0';
         xInput.style.border = '1px solid #dee2e6';
         xInput.style.borderRadius = '4px';
-        
+
         // Create P label
         const pSpan = document.createElement('span');
         pSpan.className = 'fw-bold';
         pSpan.textContent = 'P';
         pSpan.style.fontSize = '1.4rem';
         pSpan.style.margin = '0 8px';
-        
+
         // Create Y input with proper styling
         const yInput = document.createElement('input');
         yInput.type = 'text';
@@ -1156,7 +1155,7 @@ function updateAttendanceTable(siteWorkers, date, siteId) {
         yInput.style.padding = '0';
         yInput.style.border = '1px solid #dee2e6';
         yInput.style.borderRadius = '4px';
-        
+
         // Apply disabled styling for absent workers
         if (!isPresent) {
             xInput.disabled = true;
@@ -1164,29 +1163,29 @@ function updateAttendanceTable(siteWorkers, date, siteId) {
             xInput.style.backgroundColor = '#eee';
             yInput.style.backgroundColor = '#eee';
         }
-        
+
         // Add elements to container
         hajiriContainer.appendChild(xInput);
         hajiriContainer.appendChild(pSpan);
         hajiriContainer.appendChild(yInput);
-        
+
         // Add container to cell
         tdHajiri.appendChild(hajiriContainer);
-        
+
         // Create hours cell with larger size
         const tdHours = document.createElement('td');
         tdHours.className = 'text-center';
         tdHours.style.width = '70px'; // Set fixed width for hours column
         tdHours.style.minWidth = '70px';
         tdHours.style.padding = '0.5rem';
-        
+
         const hoursSpan = document.createElement('span');
         hoursSpan.className = 'working-hours';
         hoursSpan.textContent = hoursValue;
         hoursSpan.style.fontSize = '1.4rem';
         hoursSpan.style.fontWeight = 'bold';
         tdHours.appendChild(hoursSpan);
-        
+
         // Append cells to row in the correct order
         tr.appendChild(tdSerial);
         tr.appendChild(tdName);
@@ -1194,9 +1193,9 @@ function updateAttendanceTable(siteWorkers, date, siteId) {
         tr.appendChild(tdPA);
         tr.appendChild(tdHours);
         tr.appendChild(tdHajiri);
-        
+
         // Append row to table body
-            tbody.appendChild(tr);
+        tbody.appendChild(tr);
     });
 }
 
@@ -1204,20 +1203,20 @@ function updateAttendanceTable(siteWorkers, date, siteId) {
 function toggleStatus(btn, newStatus) {
     const row = btn.closest('tr');
     const statusBtns = row.querySelectorAll('.status-btn');
-    
+
     // Reset all buttons to outline
     statusBtns.forEach(button => {
         button.classList.remove('btn-success', 'btn-danger');
         button.classList.add(button.dataset.status === 'present' ? 'btn-outline-success' : 'btn-outline-danger');
     });
-    
+
     // Set active button
     btn.classList.remove(btn.dataset.status === 'present' ? 'btn-outline-success' : 'btn-outline-danger');
     btn.classList.add(btn.dataset.status === 'present' ? 'btn-success' : 'btn-danger');
-    
+
     // Update hidden status field
     row.querySelector('.attendance-status').value = newStatus;
-    
+
     // Mark row as changed
     row.classList.add('table-warning');
 }
@@ -1228,29 +1227,29 @@ function handleTimeChange(input) {
     const inTimeInput = row.querySelector('.attendance-in-time');
     const outTimeInput = row.querySelector('.attendance-out-time');
     const workingHoursSpan = row.querySelector('.working-hours');
-    
+
     // Update the display format for the time input
     if (input.value) {
         const formatted12Hour = formatTimeFor12Hour(input.value);
         input.dataset.display = formatted12Hour;
-        
+
         // Update the visual display of the time input to show 12-hour format
         input.setAttribute('placeholder', formatted12Hour);
     }
-    
+
     // If either input has changed from its original value, mark row as changed
-    if (inTimeInput.value !== inTimeInput.dataset.original || 
+    if (inTimeInput.value !== inTimeInput.dataset.original ||
         outTimeInput.value !== outTimeInput.dataset.original) {
         row.classList.add('table-warning');
     } else {
         row.classList.remove('table-warning');
     }
-    
+
     // Calculate working hours if both times are set
     if (inTimeInput.value && outTimeInput.value) {
         const inTime = parseTimeInput(inTimeInput.value);
         const outTime = parseTimeInput(outTimeInput.value);
-        
+
         if (inTime && outTime) {
             const workingHours = calculateHoursDifference(inTime, outTime);
             workingHoursSpan.textContent = formatHours(workingHours);
@@ -1261,40 +1260,40 @@ function handleTimeChange(input) {
 // Allow direct editing of time input
 function enableDirectTimeEdit(input) {
     input.readOnly = true;
-    
+
     // Remove any existing click listener
     const newInput = input.cloneNode(true);
     input.parentNode.replaceChild(newInput, input);
-    
+
     // Add click event to open time picker
-    newInput.addEventListener('click', function() {
-        showInfiniteTimePicker(this, function(selectedTime) {
+    newInput.addEventListener('click', function () {
+        showInfiniteTimePicker(this, function (selectedTime) {
             if (selectedTime) {
                 console.log('Time selected for input:', selectedTime);
-                
+
                 // Temporarily remove readonly to ensure value can be set
                 newInput.removeAttribute('readonly');
-                
+
                 // Set the value directly
                 newInput.value = selectedTime;
-                
+
                 // Restore readonly
                 newInput.readOnly = true;
-                
-            const row = newInput.closest('tr');
-            if (row) {
-                markRowChanged(row);
-                
-                // Calculate working hours if both in and out times are set
-                const inTimeInput = row.querySelector('.attendance-in-time');
-                const outTimeInput = row.querySelector('.attendance-out-time');
-                
-                if (inTimeInput && outTimeInput && 
-                    inTimeInput.value && outTimeInput.value) {
-                    try {
-                        handleTimeChange(inTimeInput);
-                    } catch (error) {
-                        console.error('Error calculating hours:', error);
+
+                const row = newInput.closest('tr');
+                if (row) {
+                    markRowChanged(row);
+
+                    // Calculate working hours if both in and out times are set
+                    const inTimeInput = row.querySelector('.attendance-in-time');
+                    const outTimeInput = row.querySelector('.attendance-out-time');
+
+                    if (inTimeInput && outTimeInput &&
+                        inTimeInput.value && outTimeInput.value) {
+                        try {
+                            handleTimeChange(inTimeInput);
+                        } catch (error) {
+                            console.error('Error calculating hours:', error);
                         }
                     }
                 }
@@ -1306,14 +1305,14 @@ function enableDirectTimeEdit(input) {
 // Parse time input in HH:MM format
 function parseTimeInput(timeStr) {
     if (!timeStr) return null;
-    
+
     const [hours, minutes] = timeStr.split(':').map(Number);
-    
+
     if (isNaN(hours) || isNaN(minutes)) return null;
-    
+
     const date = new Date();
     date.setHours(hours, minutes, 0, 0);
-    
+
     return date;
 }
 
@@ -1321,12 +1320,12 @@ function parseTimeInput(timeStr) {
 function calculateHoursDifference(startTime, endTime) {
     // If end time is earlier than start time, assume it's for the next day
     let timeDiff = endTime - startTime;
-    
+
     if (timeDiff < 0) {
         // Add 24 hours (next day)
         timeDiff += 24 * 60 * 60 * 1000;
     }
-    
+
     // Return hours difference with decimals (e.g. 8.5 for 8 hours 30 minutes)
     return timeDiff / (1000 * 60 * 60);
 }
@@ -1334,36 +1333,36 @@ function calculateHoursDifference(startTime, endTime) {
 // Format hours as HH:MM
 function formatHours(hours) {
     if (!hours) return '';
-    
+
     const wholeHours = Math.floor(hours);
     const minutes = Math.round((hours - wholeHours) * 60);
-    
+
     return `${wholeHours}:${minutes.toString().padStart(2, '0')}`;
 }
 
 // Convert time from HH:MM AM/PM to HH:MM for time input
 function convertToTimeInputFormat(timeStr) {
     if (!timeStr) return '';
-    
+
     try {
         const timeParts = timeStr.match(/(\d+):(\d+) (\w+)/);
         if (!timeParts) {
             // Already in 24-hour format
             return timeStr;
         }
-        
+
         let hours = parseInt(timeParts[1]);
         const minutes = timeParts[2];
         const period = timeParts[3];
-        
+
         if (period.toLowerCase() === 'pm' && hours < 12) {
             hours += 12;
         } else if (period.toLowerCase() === 'am' && hours === 12) {
             hours = 0;
         }
-        
+
         return `${hours.toString().padStart(2, '0')}:${minutes}`;
-        } catch (error) {
+    } catch (error) {
         console.error('Error converting time format:', error, timeStr);
         return '';
     }
@@ -1378,7 +1377,7 @@ async function checkApiEndpoint(url) {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         });
-        
+
         console.log(`API endpoint ${url} check status:`, response.status);
         return response.ok;
     } catch (error) {
@@ -1398,7 +1397,7 @@ function saveAllAttendance() {
     // Check if checkbox is checked (for final submission to site incharge)
     const checkbox = document.getElementById('attendance-confirm-checkbox');
     const isSubmitToIncharge = checkbox && checkbox.checked;
-    
+
     // If submitting to incharge, use the dedicated function
     if (isSubmitToIncharge) {
         submitToIncharge();
@@ -1408,7 +1407,7 @@ function saveAllAttendance() {
     // Disable save button
     const saveBtn = document.getElementById('save-all-attendance');
     if (!saveBtn) return;
-    
+
     saveBtn.disabled = true;
     saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
 
@@ -1417,10 +1416,10 @@ function saveAllAttendance() {
 
     // Always backup attendance to localStorage first
     backupAttendanceToLocalStorage();
-    
+
     // Only show the Hindi message "नाम सहेजे गए" without any other popups
     showToast('नाम सहेजे गए', 'success');
-    
+
     // Show the load draft button - always visible
     const loadDraftBtn = document.getElementById('load-draft-btn');
     if (loadDraftBtn) loadDraftBtn.style.display = 'block';
@@ -1428,7 +1427,7 @@ function saveAllAttendance() {
     // Check for user authentication
     let userAuthenticated = false;
     let userId = null;
-    
+
     // First check if currentUser is already set correctly
     if (currentUser && (currentUser._id || currentUser.id)) {
         userId = currentUser._id || currentUser.id;
@@ -1468,7 +1467,7 @@ function saveAllAttendance() {
             if (!isAvailable) {
                 throw new Error('Attendance API endpoint is not available. Please check your server connection.');
             }
-            
+
             // Prepare promises and payload
             const savePromises = [];
 
@@ -1477,35 +1476,34 @@ function saveAllAttendance() {
                 const date = row.dataset.date;
                 const siteId = row.dataset.siteId;
                 const attendanceId = row.querySelector('.attendance-id')?.value || '';
-                
+
                 // Get P/A status
                 const hajiriPA = row.querySelector('.pa-toggle-btn')?.textContent || 'A';
-                
+
                 // Set status based on hajiriPA value
                 const status = hajiriPA === 'P' ? 'present' : 'absent';
-                
+
                 // Get X/Y values for working hours calculation
                 const hajiriX = row.querySelector('.hajiri-x')?.value || '0';
                 const hajiriY = row.querySelector('.hajiri-y')?.value || '0';
-                
+
                 // Calculate working hours from X and Y
                 const workingHours = (parseInt(hajiriX) || 0) * 8 + (parseInt(hajiriY) || 0);
-                
+
                 // Create a date object for this attendance record (for inTime)
                 const attendanceDate = new Date(date);
-                
+
                 // FIXED: Use the correct field names expected by the API (worker and site, not workerId and siteId)
                 const attendanceData = {
                     worker: workerId,
                     site: siteId,
                     date: date,
                     status: status,
-                    workingHours: workingHours,
                     hajiriPA: hajiriPA,
-                    hajiriX: hajiriX, 
+                    hajiriX: hajiriX,
                     hajiriY: hajiriY
                 };
-                
+
                 // Add the required markedBy field
                 if (userId) {
                     attendanceData.markedBy = userId;
@@ -1527,7 +1525,7 @@ function saveAllAttendance() {
                         console.warn('Error parsing user from localStorage. Proceeding in draft mode:', e);
                     }
                 }
-                
+
                 // Add inTime for present workers (required by server model)
                 if (status === 'present') {
                     // Set a default inTime of 9 AM
@@ -1553,80 +1551,80 @@ function saveAllAttendance() {
                         },
                         body: JSON.stringify(attendanceData)
                     })
-                    .then(response => {
-                        // Log the response status
-                        console.log(`Response for ${workerId}:`, response.status, response.statusText);
-                        
-                        if (!response.ok) {
-                            const error = new Error(`HTTP error ${response.status}`);
-                            error.response = response;
-                            error.requestData = attendanceData; // Store the data that caused the error
-                            throw error;
-                        }
-                        
-                        // Try to parse JSON response safely
-                        return response.text().then(text => {
-                            try {
-                                if (!text || text.trim() === '') {
-                                    // Handle empty response
-                                    return { status: 'success', message: 'Saved successfully' };
-                                }
-                                
-                                // Check if the response starts with HTML doctype or tags
-                                if (text.trim().toLowerCase().startsWith('<!doctype') || 
-                                    text.trim().toLowerCase().startsWith('<html')) {
-                                    console.log('Received HTML response instead of JSON');
-                                    console.log('This is normal and not an error - the server returned a success status code (200 OK)');
+                        .then(response => {
+                            // Log the response status
+                            console.log(`Response for ${workerId}:`, response.status, response.statusText);
+
+                            if (!response.ok) {
+                                const error = new Error(`HTTP error ${response.status}`);
+                                error.response = response;
+                                error.requestData = attendanceData; // Store the data that caused the error
+                                throw error;
+                            }
+
+                            // Try to parse JSON response safely
+                            return response.text().then(text => {
+                                try {
+                                    if (!text || text.trim() === '') {
+                                        // Handle empty response
+                                        return { status: 'success', message: 'Saved successfully' };
+                                    }
+
+                                    // Check if the response starts with HTML doctype or tags
+                                    if (text.trim().toLowerCase().startsWith('<!doctype') ||
+                                        text.trim().toLowerCase().startsWith('<html')) {
+                                        console.log('Received HTML response instead of JSON');
+                                        console.log('This is normal and not an error - the server returned a success status code (200 OK)');
+                                        // Return a valid object instead of throwing
+                                        return {
+                                            status: 'success',
+                                            message: 'Saved successfully (HTML response received)',
+                                            rawResponse: text.substring(0, 100) + '...' // Just log a snippet
+                                        };
+                                    }
+
+                                    return JSON.parse(text);
+                                } catch (e) {
+                                    console.error('Error parsing JSON response:', e);
+                                    console.error('Raw response text (first 200 chars):', text.substring(0, 100) + '...');
                                     // Return a valid object instead of throwing
-                                    return { 
-                                        status: 'success', 
-                                        message: 'Saved successfully (HTML response received)',
-                                        rawResponse: text.substring(0, 100) + '...' // Just log a snippet
+                                    return {
+                                        status: 'success',
+                                        message: 'Saved successfully (non-JSON response)',
+                                        rawResponse: text.substring(0, 100) + '...'
                                     };
                                 }
-                                
-                                return JSON.parse(text);
-                            } catch (e) {
-                                console.error('Error parsing JSON response:', e);
-                                console.error('Raw response text (first 200 chars):', text.substring(0, 100) + '...');
-                                // Return a valid object instead of throwing
-                                return { 
-                                    status: 'success', 
-                                    message: 'Saved successfully (non-JSON response)',
-                                    rawResponse: text.substring(0, 100) + '...'
-                                };
+                            });
+                        })
+                        .then(data => {
+                            if (data.status !== 'success') {
+                                const error = new Error(data.message || 'Error saving attendance');
+                                error.requestData = attendanceData; // Store the data that caused the error
+                                throw error;
                             }
-                        });
-                    })
-                    .then(data => {
-                        if (data.status !== 'success') {
-                            const error = new Error(data.message || 'Error saving attendance');
-                            error.requestData = attendanceData; // Store the data that caused the error
+                            return data;
+                        })
+                        .catch(error => {
+                            // Log the request data that caused the error
+                            if (error.requestData) {
+                                console.error('Error occurred with this request data:', error.requestData);
+                            }
+
+                            if (error.response) {
+                                // This is a response error, use our helper
+                                return handleApiError(error, error.response)
+                                    .then(errorMsg => {
+                                        throw new Error(errorMsg);
+                                    })
+                                    .catch(e => {
+                                        // If handleApiError itself fails, provide a fallback error
+                                        console.error('Error in handleApiError:', e);
+                                        throw new Error('Failed to process server response');
+                                    });
+                            }
+                            // Regular error
                             throw error;
-                        }
-                        return data;
-                    })
-                    .catch(error => {
-                        // Log the request data that caused the error
-                        if (error.requestData) {
-                            console.error('Error occurred with this request data:', error.requestData);
-                        }
-                        
-                        if (error.response) {
-                            // This is a response error, use our helper
-                            return handleApiError(error, error.response)
-                                .then(errorMsg => {
-                                    throw new Error(errorMsg);
-                                })
-                                .catch(e => {
-                                    // If handleApiError itself fails, provide a fallback error
-                                    console.error('Error in handleApiError:', e);
-                                    throw new Error('Failed to process server response');
-                                });
-                        }
-                        // Regular error
-                        throw error;
-                    })
+                        })
                 );
             });
 
@@ -1636,18 +1634,18 @@ function saveAllAttendance() {
         .then(results => {
             // Don't show any additional toast messages - we already showed "नाम सहेजे गए"
             console.log(`Successfully saved ${results.length} attendance records`);
-            
+
             // DO NOT reload attendance data or call restoreAttendanceFromLocalStorage here
             // This prevents the duplicate toast message
         })
         .catch(error => {
             console.error('Error saving attendance:', error);
-            
+
             // Don't show any additional error messages - we already showed "नाम सहेजे गए"
             // Just log errors to console
-            
-                // Ensure the draft is saved
-                backupAttendanceToLocalStorage();
+
+            // Ensure the draft is saved
+            backupAttendanceToLocalStorage();
         })
         .finally(() => {
             // Re-enable save button
@@ -1667,10 +1665,10 @@ function submitToIncharge() {
     // Disable submit button
     const saveBtn = document.getElementById('save-all-attendance');
     if (!saveBtn) return;
-    
+
     saveBtn.disabled = true;
     saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Submitting...';
-    
+
     // Get current date and time for submission timestamp
     const submissionTimestamp = new Date().toISOString();
     const submissionDate = new Date().toLocaleDateString();
@@ -1678,7 +1676,7 @@ function submitToIncharge() {
 
     // Check for user authentication
     let userId = null;
-    
+
     // First check if currentUser is already set correctly
     if (currentUser && (currentUser._id || currentUser.id)) {
         userId = currentUser._id || currentUser.id;
@@ -1718,10 +1716,10 @@ function submitToIncharge() {
             if (!isAvailable) {
                 throw new Error('Attendance API endpoint is not available. Please check your server connection.');
             }
-            
+
             // Backup attendance to localStorage first
             backupAttendanceToLocalStorage();
-            
+
             // Prepare promises and payload
             const savePromises = [];
             const siteId = sites.length > 0 ? sites[0]._id : null;
@@ -1730,32 +1728,31 @@ function submitToIncharge() {
             changedRows.forEach(row => {
                 const workerId = row.dataset.workerId;
                 const attendanceId = row.querySelector('.attendance-id')?.value || '';
-                
+
                 // Get P/A status
                 const hajiriPA = row.querySelector('.pa-toggle-btn')?.textContent || 'A';
-                
+
                 // Set status based on hajiriPA value
                 const status = hajiriPA === 'P' ? 'present' : 'absent';
-                
+
                 // Get X/Y values for working hours calculation
                 const hajiriX = row.querySelector('.hajiri-x')?.value || '0';
                 const hajiriY = row.querySelector('.hajiri-y')?.value || '0';
-                
+
                 // Calculate working hours from X and Y
                 const workingHours = (parseInt(hajiriX) || 0) * 8 + (parseInt(hajiriY) || 0);
-                
+
                 // Create a date object for this attendance record (for inTime)
                 const attendanceDate = new Date(date);
-                
+
                 // FIXED: Use the correct field names expected by the API (worker and site, not workerId and siteId)
                 const attendanceData = {
                     worker: workerId,
                     site: siteId,
                     date: date,
                     status: status,
-                    workingHours: workingHours,
                     hajiriPA: hajiriPA,
-                    hajiriX: hajiriX, 
+                    hajiriX: hajiriX,
                     hajiriY: hajiriY,
                     // Add submission status for final submission to incharge
                     verified: false, // Changed from true to false - incharge needs to verify
@@ -1765,25 +1762,25 @@ function submitToIncharge() {
                     submissionDate: submissionDate,
                     submissionTime: submissionTime
                 };
-                
+
                 // Add the required markedBy field using the userId we found
                 if (userId) {
                     attendanceData.markedBy = userId;
                 } else {
                     console.warn('No user ID available for markedBy field. This might cause server errors.');
                 }
-                
+
                 // Add inTime for present workers (required by server model)
                 if (status === 'present') {
                     // Set a default inTime of 9 AM
                     const inTime = new Date(attendanceDate);
                     inTime.setHours(9, 0, 0, 0);
                     attendanceData.inTime = inTime.toISOString();
-                    
+
                     // Add out time if needed
-                        const outTime = new Date(attendanceDate);
+                    const outTime = new Date(attendanceDate);
                     outTime.setHours(17, 0, 0, 0);  // Default to 5 PM
-                        attendanceData.outTime = outTime.toISOString();
+                    attendanceData.outTime = outTime.toISOString();
                 }
 
                 // Determine HTTP method and URL
@@ -1803,74 +1800,66 @@ function submitToIncharge() {
                         },
                         body: JSON.stringify(attendanceData)
                     })
-                    .then(response => {
-                        // Log the response status
-                        console.log(`Response for ${workerId}:`, response.status, response.statusText);
-                        
-                        if (!response.ok) {
-                            const error = new Error(`HTTP error ${response.status}`);
-                            error.response = response;
-                            error.requestData = attendanceData; // Store the data that caused the error
-                            throw error;
-                        }
-                        
-                        // Try to parse JSON response safely
-                        return response.text().then(text => {
-                            try {
-                                if (!text || text.trim() === '') {
-                                    // Handle empty response
-                                    return { status: 'success', message: 'Submitted successfully' };
-                                }
-                                
-                                // Check if the response starts with HTML doctype or tags
-                                if (text.trim().toLowerCase().startsWith('<!doctype') || 
-                                    text.trim().toLowerCase().startsWith('<html')) {
-                                    console.log('Received HTML response instead of JSON');
-                                    console.log('Raw response text (first 200 chars):', text.substring(0, 200));
-                                    // Return a valid object instead of throwing
-                                    return { 
-                                        status: 'success', 
-                                        message: 'Submitted successfully (HTML response received)',
-                                        rawResponse: text.substring(0, 100) + '...'
-                                    };
-                                }
-                                
-                                return JSON.parse(text);
-                            } catch (e) {
-                                console.error('Error parsing JSON response:', e);
-                                console.error('Raw response text:', text.substring(0, 200));
-                                // Return a valid object instead of throwing
-                                return { 
-                                    status: 'success', 
-                                    message: 'Submitted successfully (non-JSON response)',
-                                    rawResponse: text.substring(0, 100) + '...'
-                                };
+                        .then(response => {
+                            // Log the response status
+                            console.log(`Response for ${workerId}:`, response.status, response.statusText);
+
+                            if (!response.ok) {
+                                const error = new Error(`HTTP error ${response.status}`);
+                                error.response = response;
+                                error.requestData = attendanceData; // Store the data that caused the error
+                                throw error;
                             }
-                        });
-                    })
-                    .then(data => {
-                        if (data.status !== 'success') {
-                            const error = new Error(data.message || 'Error submitting attendance');
-                            error.requestData = attendanceData; // Store the data that caused the error
-                            throw error;
-                        }
-                        return data;
-                    })
-                    .catch(error => {
-                        // Log the request data that caused the error
-                        if (error.requestData) {
-                            console.error('Error occurred with this request data:', error.requestData);
-                        }
-                        
-                        if (error.response) {
-                            // This is a response error, use our helper
-                            return handleApiError(error, error.response).then(errorMsg => {
-                                throw new Error(errorMsg);
+
+                            // Try to parse JSON response safely
+                            return response.text().then(text => {
+                                try {
+                                    if (!text || text.trim() === '') {
+                                        // Handle empty response
+                                        return { status: 'success', message: 'Submitted successfully' };
+                                    }
+
+                                    // Check if the response starts with HTML doctype or tags
+                                    if (text.trim().toLowerCase().startsWith('<!doctype') ||
+                                        text.trim().toLowerCase().startsWith('<html')) {
+                                        console.error('Received HTML response instead of JSON');
+                                        console.error('Raw response text (first 200 chars):', text.substring(0, 200));
+                                        // THROW instead of treating as success
+                                        throw new Error('Server returned HTML instead of JSON – possible backend error or misroute.');
+                                    }
+
+                                    return JSON.parse(text);
+                                } catch (e) {
+                                    console.error('Error parsing JSON response:', e);
+                                    console.error('Raw response text:', text.substring(0, 200));
+                                    // THROW instead of returning "success"
+                                    throw new Error('Failed to parse JSON response from server.');
+                                }
                             });
-                        }
-                        // Regular error
-                        throw error;
-                    })
+                        })
+                        .then(data => {
+                            if (data.status !== 'success') {
+                                const error = new Error(data.message || 'Error submitting attendance');
+                                error.requestData = attendanceData; // Store the data that caused the error
+                                throw error;
+                            }
+                            return data;
+                        })
+                        .catch(error => {
+                            // Log the request data that caused the error
+                            if (error.requestData) {
+                                console.error('Error occurred with this request data:', error.requestData);
+                            }
+
+                            if (error.response) {
+                                // This is a response error, use our helper
+                                return handleApiError(error, error.response).then(errorMsg => {
+                                    throw new Error(errorMsg);
+                                });
+                            }
+                            // Regular error
+                            throw error;
+                        })
                 );
             });
 
@@ -1881,26 +1870,32 @@ function submitToIncharge() {
             const submissionTime = new Date().toLocaleTimeString();
             const submissionDate = new Date().toLocaleDateString();
             showToast(`Successfully submitted ${results.length} attendance records to site incharge at ${submissionTime} on ${submissionDate}`, 'success');
-            
+
             // Clear localStorage backup since it's no longer needed
             const date = document.getElementById('attendance-date')?.value || new Date().toISOString().split('T')[0];
             localStorage.removeItem(`attendance_backup_${date}`);
             console.log('Cleared localStorage backup after submitting to incharge');
-            
+
             // Hide the load draft button since draft was cleared
             const loadDraftBtn = document.getElementById('load-draft-btn');
             if (loadDraftBtn) loadDraftBtn.style.display = 'none';
-            
+
             // Reload attendance data
             loadAttendance();
         })
         .catch(error => {
             console.error('Error submitting attendance:', error);
-            
+
+            // Check for duplicate attendance error
+            if (error.message && error.message.includes('already exists')) {
+                showToast('Some attendance records already exist for the selected date. Please check existing records or select a different date.', 'warning');
+                return; // Don't save as draft for duplicate entries
+            }
+
             // Check if this is a markedBy related error
             if (error.message && (
-                error.message.includes('markedBy') || 
-                error.message.includes('User not found') || 
+                error.message.includes('markedBy') ||
+                error.message.includes('User not found') ||
                 error.message.includes('Missing required field')
             )) {
                 showToast('Error: User authentication issue. Your changes have been saved as a draft locally.', 'warning');
@@ -1919,7 +1914,7 @@ function submitToIncharge() {
             // Re-enable save button
             saveBtn.disabled = false;
             saveBtn.innerHTML = 'Submit to Incharge';
-            
+
             // Uncheck the checkbox
             const checkbox = document.getElementById('attendance-confirm-checkbox');
             if (checkbox) checkbox.checked = false;
@@ -1932,21 +1927,21 @@ function toggleAttendanceSubmitButton() {
     const checkbox = document.getElementById('attendance-confirm-checkbox');
     const saveBtn = document.getElementById('save-all-attendance');
     const confirmMsg = document.getElementById('attendance-confirm-message');
-    
+
     if (!saveBtn) return;
-    
+
     if (checkbox && checkbox.checked) {
         saveBtn.textContent = 'Submit to Incharge';
         saveBtn.classList.remove('btn-primary');
         saveBtn.classList.add('btn-success');
-        
+
         // Remove confirmation message if present
         if (confirmMsg) confirmMsg.remove();
     } else {
         saveBtn.textContent = 'Save Changes';
         saveBtn.classList.remove('btn-success');
         saveBtn.classList.add('btn-primary');
-        
+
         // Remove confirmation message
         if (confirmMsg) {
             confirmMsg.remove();
@@ -1959,11 +1954,11 @@ function calculateWorkingHours(inTimeId, outTimeId, resultId) {
     const inTimeInput = document.getElementById(inTimeId);
     const outTimeInput = document.getElementById(outTimeId);
     const resultInput = document.getElementById(resultId);
-    
+
     if (inTimeInput.value && outTimeInput.value) {
         const inTime = parseTimeInput(inTimeInput.value);
         const outTime = parseTimeInput(outTimeInput.value);
-        
+
         if (inTime && outTime) {
             const workingHours = calculateHoursDifference(inTime, outTime);
             resultInput.value = formatHours(workingHours);
@@ -1973,7 +1968,7 @@ function calculateWorkingHours(inTimeId, outTimeId, resultId) {
 
 // Helper function to get badge class based on status
 function getStatusBadgeClass(status) {
-    switch(status) {
+    switch (status) {
         case 'present': return 'bg-success';
         case 'absent': return 'bg-danger';
         case 'late': return 'bg-warning';
@@ -1985,16 +1980,16 @@ function getStatusBadgeClass(status) {
 function showUpdateAttendanceModal(attendanceId) {
     // Get attendance record
     const attendanceRecord = attendanceRecords.find(record => record._id === attendanceId);
-    
+
     if (!attendanceRecord) {
         console.error('Attendance record not found:', attendanceId);
         return;
     }
-    
+
     // Set fields in modal
     document.getElementById('update-attendance-id').value = attendanceId;
     document.getElementById('update-worker-name').textContent = attendanceRecord.worker ? attendanceRecord.worker.name : 'Unknown';
-    
+
     const statusSelect = document.getElementById('update-status');
     if (statusSelect) {
         for (let i = 0; i < statusSelect.options.length; i++) {
@@ -2004,69 +1999,69 @@ function showUpdateAttendanceModal(attendanceId) {
             }
         }
     }
-    
+
     // Parse and set time inputs
     const checkinTimeInput = document.getElementById('check-in-time');
     const checkoutTimeInput = document.getElementById('check-out-time');
-    
+
     // Format in/out times for input (HH:MM format)
     if (checkinTimeInput && attendanceRecord.inTime) {
         const date = new Date(attendanceRecord.inTime);
         checkinTimeInput.value = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-        
+
         checkinTimeInput.readOnly = true;
-        
+
         // Remove any existing click listener and add new one
         const newCheckinInput = checkinTimeInput.cloneNode(true);
         checkinTimeInput.parentNode.replaceChild(newCheckinInput, checkinTimeInput);
-        
-        newCheckinInput.addEventListener('click', function() {
-            showInfiniteTimePicker(this, function(selectedTime) {
+
+        newCheckinInput.addEventListener('click', function () {
+            showInfiniteTimePicker(this, function (selectedTime) {
                 if (selectedTime) {
                     console.log('Time selected for check-in:', selectedTime);
-                    
+
                     // Temporarily remove readonly to ensure value can be set
                     newCheckinInput.removeAttribute('readonly');
-                    
+
                     // Set the value directly
                     newCheckinInput.value = selectedTime;
-                    
+
                     // Restore readonly
                     newCheckinInput.readOnly = true;
-                    
-                // Calculate working hours if both times are set
-                calculateWorkingHours('check-in-time', 'check-out-time', 'update-working-hours');
+
+                    // Calculate working hours if both times are set
+                    calculateWorkingHours('check-in-time', 'check-out-time', 'update-working-hours');
                 }
             });
         });
     }
-    
+
     if (checkoutTimeInput && attendanceRecord.outTime) {
         const date = new Date(attendanceRecord.outTime);
         checkoutTimeInput.value = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-        
+
         checkoutTimeInput.readOnly = true;
-        
+
         // Remove any existing click listener and add new one
         const newCheckoutInput = checkoutTimeInput.cloneNode(true);
         checkoutTimeInput.parentNode.replaceChild(newCheckoutInput, checkoutTimeInput);
-        
-        newCheckoutInput.addEventListener('click', function() {
-            showInfiniteTimePicker(this, function(selectedTime) {
+
+        newCheckoutInput.addEventListener('click', function () {
+            showInfiniteTimePicker(this, function (selectedTime) {
                 if (selectedTime) {
                     console.log('Time selected for check-out:', selectedTime);
-                    
+
                     // Temporarily remove readonly to ensure value can be set
                     newCheckoutInput.removeAttribute('readonly');
-                    
+
                     // Set the value directly
                     newCheckoutInput.value = selectedTime;
-                    
+
                     // Restore readonly
                     newCheckoutInput.readOnly = true;
-                    
-                // Calculate working hours if both times are set
-        calculateWorkingHours('check-in-time', 'check-out-time', 'update-working-hours');
+
+                    // Calculate working hours if both times are set
+                    calculateWorkingHours('check-in-time', 'check-out-time', 'update-working-hours');
                 }
             });
         });
@@ -2074,7 +2069,7 @@ function showUpdateAttendanceModal(attendanceId) {
 
     // Set working hours
     document.getElementById('update-working-hours').value = attendanceRecord.workingHours || '';
-    
+
     // Show modal
     const modal = new bootstrap.Modal(document.getElementById('updateAttendanceModal'));
     modal.show();
@@ -2086,18 +2081,18 @@ function updateAttendance() {
     const status = document.querySelector('input[name="update-status"]:checked').value;
     const checkIn = document.getElementById('check-in-time').value;
     const checkOut = document.getElementById('check-out-time').value;
-    
+
     // Create date object from attendance record for ISO string
     const record = attendanceRecords.find(r => r._id === attendanceId);
     const date = record ? new Date(record.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-    
+
     const formData = { status };
-    
+
     // Add check-in time if provided
     if (checkIn) {
         formData.inTime = new Date(`${date}T${checkIn}`).toISOString();
     }
-    
+
     // Add check-out time if provided
     if (checkOut) {
         formData.outTime = new Date(`${date}T${checkOut}`).toISOString();
@@ -2111,21 +2106,21 @@ function updateAttendance() {
         },
         body: JSON.stringify(formData)
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            bootstrap.Modal.getInstance(document.getElementById('updateAttendanceModal')).hide();
-            loadAttendance();
-            loadOverviewStats();
-            showToast('Attendance updated successfully', 'success');
-        } else {
-            showToast(data.message || 'Error updating attendance', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showToast('Network error. Please try again later.', 'error');
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                bootstrap.Modal.getInstance(document.getElementById('updateAttendanceModal')).hide();
+                loadAttendance();
+                loadOverviewStats();
+                showToast('Attendance updated successfully', 'success');
+            } else {
+                showToast(data.message || 'Error updating attendance', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('Network error. Please try again later.', 'error');
+        });
 }
 
 // Add attendance record
@@ -2137,25 +2132,25 @@ function addAttendance() {
     const status = document.querySelector('input[name="status"]:checked').value;
     const checkIn = document.getElementById('add-check-in-time').value;
     const checkOut = document.getElementById('add-check-out-time').value;
-    
+
     // Validate required fields
     if (!workerId || !date) {
         showToast('Please select worker and date', 'warning');
         return;
     }
-    
+
     // Check if a site is available
     if (!siteId) {
         showToast('No site available for attendance', 'warning');
         return;
     }
-    
+
     // Validate status-specific fields
     if ((status === 'present' || status === 'late') && !checkIn) {
         showToast('Check-in time is required for present or late status', 'warning');
         return;
     }
-    
+
     // Prepare request data
     const formData = {
         workerId: workerId,
@@ -2163,16 +2158,16 @@ function addAttendance() {
         date: date,
         status: status
     };
-    
+
     // Add time fields if provided
     if (checkIn) {
         formData.inTime = new Date(`${date}T${checkIn}`).toISOString();
     }
-    
+
     if (checkOut) {
         formData.outTime = new Date(`${date}T${checkOut}`).toISOString();
     }
-    
+
     // Send the request
     fetch('/api/attendance', {
         method: 'POST',
@@ -2182,94 +2177,94 @@ function addAttendance() {
         },
         body: JSON.stringify(formData)
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            bootstrap.Modal.getInstance(document.getElementById('addAttendanceModal')).hide();
-            loadAttendance();
-            loadOverviewStats();
-            showToast('Attendance record added successfully', 'success');
-        } else {
-            showToast(data.message || 'Error adding attendance record', 'warning');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showToast('Network error. Please try again later.', 'error');
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                bootstrap.Modal.getInstance(document.getElementById('addAttendanceModal')).hide();
+                loadAttendance();
+                loadOverviewStats();
+                showToast('Attendance record added successfully', 'success');
+            } else {
+                showToast(data.message || 'Error adding attendance record', 'warning');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('Network error. Please try again later.', 'error');
+        });
 }
 
 // Show add attendance modal
 function showAddAttendanceModal() {
     // Set site ID
     document.getElementById('add-attendance-site').value = sites.length > 0 ? sites[0]._id : '';
-    
+
     // Set today's date
     document.getElementById('add-attendance-date').value = document.getElementById('attendance-date').value;
-    
+
     // Populate worker select
     updateWorkerSelect();
-    
+
     // Setup time inputs with our new time picker
     const checkinTimeInput = document.getElementById('add-check-in-time');
     const checkoutTimeInput = document.getElementById('add-check-out-time');
-    
+
     if (checkinTimeInput) {
         checkinTimeInput.readOnly = true;
-        
+
         // Remove any existing click listener and add new one
         const newCheckinInput = checkinTimeInput.cloneNode(true);
         checkinTimeInput.parentNode.replaceChild(newCheckinInput, checkinTimeInput);
-        
-        newCheckinInput.addEventListener('click', function() {
-            showInfiniteTimePicker(this, function(selectedTime) {
+
+        newCheckinInput.addEventListener('click', function () {
+            showInfiniteTimePicker(this, function (selectedTime) {
                 if (selectedTime) {
                     console.log('Time selected for add check-in:', selectedTime);
-                    
+
                     // Temporarily remove readonly to ensure value can be set
                     newCheckinInput.removeAttribute('readonly');
-                    
+
                     // Set the value directly
                     newCheckinInput.value = selectedTime;
-                    
+
                     // Restore readonly
                     newCheckinInput.readOnly = true;
-                    
-                // Calculate working hours if both times are set
-                calculateWorkingHours('add-check-in-time', 'add-check-out-time', 'add-working-hours');
+
+                    // Calculate working hours if both times are set
+                    calculateWorkingHours('add-check-in-time', 'add-check-out-time', 'add-working-hours');
                 }
             });
         });
     }
-    
+
     if (checkoutTimeInput) {
         checkoutTimeInput.readOnly = true;
-        
+
         // Remove any existing click listener and add new one
         const newCheckoutInput = checkoutTimeInput.cloneNode(true);
         checkoutTimeInput.parentNode.replaceChild(newCheckoutInput, checkoutTimeInput);
-        
-        newCheckoutInput.addEventListener('click', function() {
-            showInfiniteTimePicker(this, function(selectedTime) {
+
+        newCheckoutInput.addEventListener('click', function () {
+            showInfiniteTimePicker(this, function (selectedTime) {
                 if (selectedTime) {
                     console.log('Time selected for add check-out:', selectedTime);
-                    
+
                     // Temporarily remove readonly to ensure value can be set
                     newCheckoutInput.removeAttribute('readonly');
-                    
+
                     // Set the value directly
                     newCheckoutInput.value = selectedTime;
-                    
+
                     // Restore readonly
                     newCheckoutInput.readOnly = true;
-                    
-                // Calculate working hours if both times are set
-                calculateWorkingHours('add-check-in-time', 'add-check-out-time', 'add-working-hours');
+
+                    // Calculate working hours if both times are set
+                    calculateWorkingHours('add-check-in-time', 'add-check-out-time', 'add-working-hours');
                 }
             });
         });
     }
-    
+
     // Show the modal
     const modal = new bootstrap.Modal(document.getElementById('addAttendanceModal'));
     modal.show();
@@ -2279,7 +2274,7 @@ function showAddAttendanceModal() {
 function updateWorkerSelect() {
     const select = document.getElementById('attendance-worker');
     select.innerHTML = '<option value="">Select Worker</option>';
-    
+
     workers.forEach(worker => {
         const option = document.createElement('option');
         option.value = worker._id;
@@ -2326,11 +2321,11 @@ function loadReports() {
                 label: 'Attendance Rate',
                 data: sites.map(site => {
                     const siteWorkers = workers.filter(w => w.site === site._id);
-                    const siteAttendance = attendanceRecords.filter(a => 
-                        a.site === site._id && 
+                    const siteAttendance = attendanceRecords.filter(a =>
+                        a.site === site._id &&
                         new Date(a.date).toISOString().split('T')[0] === new Date().toISOString().split('T')[0]
                     );
-                    return siteWorkers.length > 0 ? 
+                    return siteWorkers.length > 0 ?
                         (siteAttendance.filter(a => a.status === 'present').length / siteWorkers.length) * 100 : 0;
                 }),
                 borderColor: '#007bff',
@@ -2350,7 +2345,7 @@ function loadReports() {
 }
 
 // Update profile
-document.getElementById('profile-form').addEventListener('submit', function(e) {
+document.getElementById('profile-form').addEventListener('submit', function (e) {
     e.preventDefault();
     const formData = {
         name: document.getElementById('profile-name').value,
@@ -2366,68 +2361,68 @@ document.getElementById('profile-form').addEventListener('submit', function(e) {
         },
         body: JSON.stringify(formData)
     })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Profile update response:', data);
-        if (data.status === 'success') {
-            alert('Profile updated successfully');
-            // Update currentUser with the response data
-            currentUser = data.data.user;
-            
-            // Update the user in localStorage
-            localStorage.setItem('user', JSON.stringify(currentUser));
-            
-            // Update displayed name if applicable
-            const foremanNameElement = document.getElementById('foreman-name');
-            if (foremanNameElement) {
-                foremanNameElement.textContent = currentUser.name || 'Foreman';
+        .then(response => response.json())
+        .then(data => {
+            console.log('Profile update response:', data);
+            if (data.status === 'success') {
+                alert('Profile updated successfully');
+                // Update currentUser with the response data
+                currentUser = data.data.user;
+
+                // Update the user in localStorage
+                localStorage.setItem('user', JSON.stringify(currentUser));
+
+                // Update displayed name if applicable
+                const foremanNameElement = document.getElementById('foreman-name');
+                if (foremanNameElement) {
+                    foremanNameElement.textContent = currentUser.name || 'Foreman';
+                }
+            } else {
+                alert(data.message || 'Error updating profile');
             }
-        } else {
-            alert(data.message || 'Error updating profile');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error updating profile. Please try again.');
-    });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error updating profile. Please try again.');
+        });
 });
 
 // Display workers data
 function displayWorkers(workersData) {
     console.log('Processing workers data:', workersData);
-    
+
     if (!workersData || !Array.isArray(workersData)) {
         console.error('Invalid workers data:', workersData);
         document.getElementById('workers-table').innerHTML = '<tr><td colspan="6" class="text-center">Error displaying workers</td></tr>';
-        
+
         // If workersData isn't valid but we have the global workers array, use that
         if (workers && Array.isArray(workers) && workers.length > 0) {
             console.log('Using existing workers array instead');
             workersData = workers;
         } else {
-        return;
+            return;
         }
     }
-    
+
     // Make sure global workers array is updated
     workers = workersData;
-    
+
     // Check if there are any workers
     if (workers.length === 0) {
         document.getElementById('workers-table').innerHTML = '<tr><td colspan="6" class="text-center">No workers found</td></tr>';
         return;
     }
-    
+
     updateWorkersTable();
-    
+
     // Also update worker select for attendance
     const selectElem = document.getElementById('attendance-worker');
     if (selectElem) {
         updateWorkerSelect();
     }
-    
+
     console.log('Workers array updated with', workers.length, 'workers');
-    
+
     // If attendance-section is visible, reload attendance
     const attendanceSection = document.getElementById('attendance-section');
     if (attendanceSection && attendanceSection.classList.contains('active')) {
@@ -2439,34 +2434,34 @@ function displayWorkers(workersData) {
 // Initialize section specific data when sections are activated
 function initializeSection(sectionId) {
     console.log(`Initializing section: ${sectionId}`);
-    
+
     // Handle data loading for each section when it's activated
-    switch(sectionId) {
+    switch (sectionId) {
         case 'overview-section':
             loadOverviewStats();
             break;
-            
+
         case 'workers-section':
             loadWorkers();
             break;
-            
+
         case 'attendance-section':
             // First make sure workers are loaded, then load attendance
             if (workers.length === 0) {
                 console.log("Loading workers before attendance");
                 loadWorkers().then(() => {
                     console.log("Workers loaded, now loading attendance");
-            loadAttendance();
+                    loadAttendance();
                 });
             } else {
                 loadAttendance();
             }
-            break; 
-            
+            break;
+
         case 'reports-section':
             loadReports();
             break;
-            
+
         case 'profile-section':
             loadProfileData();
             break;
@@ -2474,19 +2469,19 @@ function initializeSection(sectionId) {
 }
 
 // Listen for section changes from sidebar navigation
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Clean up old drafts (older than 7 days)
     cleanupOldDrafts();
-    
+
     // Add date change event listener
     const dateInput = document.getElementById('attendance-date');
     if (dateInput) {
-        dateInput.addEventListener('change', function() {
+        dateInput.addEventListener('change', function () {
             handleDateChange();
             loadAttendance();
         });
     }
-    
+
     // After loading attendance section, check for draft
     const loadDraftBtn = document.getElementById('load-draft-btn');
     if (dateInput && loadDraftBtn) {
@@ -2494,20 +2489,20 @@ document.addEventListener('DOMContentLoaded', function() {
         const backupJson = localStorage.getItem(`attendance_backup_${selectedDate}`);
         loadDraftBtn.style.display = backupJson ? 'block' : 'none';
     }
-    
+
     // Add event listener for our custom event from sidebar.js
-    document.addEventListener('section-changed', function(e) {
+    document.addEventListener('section-changed', function (e) {
         if (e.detail && e.detail.sectionId) {
             initializeSection(e.detail.sectionId);
         }
     });
-    
+
     // Initialize the dashboard on load
     loadDashboardData();
-    
+
     // Add click event listener for attendance section to ensure it loads correctly
     document.querySelectorAll('.nav-link[data-section="attendance-section"], #go-to-attendance').forEach(link => {
-        link.addEventListener('click', function() {
+        link.addEventListener('click', function () {
             console.log("Attendance link clicked, forcing attendance load");
             // Ensure the section is actually visible before loading
             setTimeout(() => {
@@ -2524,24 +2519,24 @@ document.addEventListener('DOMContentLoaded', function() {
 // Format time for display
 function formatTimeFor12Hour(timeStr) {
     if (!timeStr) return '';
-    
+
     try {
         // Check if the time is already in 12-hour format
         if (timeStr.includes('AM') || timeStr.includes('PM')) {
             return timeStr;
         }
-        
+
         // Parse 24-hour format (HH:MM)
         const [hours, minutes] = timeStr.split(':').map(Number);
-        
+
         if (isNaN(hours) || isNaN(minutes)) {
             return timeStr;
         }
-        
+
         // Convert to 12-hour format
         const period = hours >= 12 ? 'PM' : 'AM';
         const hours12 = hours % 12 || 12; // Convert 0 to 12 for 12 AM
-        
+
         return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
     } catch (e) {
         console.error('Error formatting time:', e);
@@ -2553,46 +2548,46 @@ function formatTimeFor12Hour(timeStr) {
 function handleTimeForDisplay() {
     // Apply time picker to all time inputs that are not already handled
     const timeInputs = document.querySelectorAll('input[type="time"]:not([data-timepicker-applied])');
-    
+
     timeInputs.forEach(input => {
         // Skip inputs that already have event listeners 
         if (input.getAttribute('data-timepicker-applied') === 'true') {
             return;
         }
-        
+
         // Make input readonly
         input.readOnly = true;
-        
+
         // Add click event to show time picker
-        input.addEventListener('click', function() {
+        input.addEventListener('click', function () {
             showInfiniteTimePicker(this, (selectedTime) => {
                 if (selectedTime) {
                     console.log('Time selected for input:', selectedTime);
-                    
+
                     // Temporarily remove readonly to ensure value can be set
                     input.removeAttribute('readonly');
-                    
+
                     // Set the value directly
                     input.value = selectedTime;
-                    
+
                     // Restore readonly
                     input.readOnly = true;
-                    
-                // If input is part of an attendance row, handle the change
-                const row = input.closest('tr');
-                if (row) {
-                    markRowChanged(row);
-                    
-                    // Calculate working hours if both in and out times are set
-                    if (input.classList.contains('attendance-in-time') || 
-                        input.classList.contains('attendance-out-time')) {
-                        handleTimeChange(input);
+
+                    // If input is part of an attendance row, handle the change
+                    const row = input.closest('tr');
+                    if (row) {
+                        markRowChanged(row);
+
+                        // Calculate working hours if both in and out times are set
+                        if (input.classList.contains('attendance-in-time') ||
+                            input.classList.contains('attendance-out-time')) {
+                            handleTimeChange(input);
                         }
                     }
                 }
             });
         });
-        
+
         // Mark as applied
         input.setAttribute('data-timepicker-applied', 'true');
     });
@@ -2604,7 +2599,7 @@ function setupModalAccessibility(modalElement) {
     modalElement.addEventListener('show.bs.modal', () => {
         // Remove aria-hidden when modal is visible
         modalElement.removeAttribute('aria-hidden');
-        
+
         try {
             // Add inert to the main content outside modal
             const mainContent = document.querySelector('main');
@@ -2615,12 +2610,12 @@ function setupModalAccessibility(modalElement) {
             console.error('Error setting inert attribute:', error);
         }
     });
-    
+
     // When modal is hidden
     modalElement.addEventListener('hidden.bs.modal', () => {
         // Add aria-hidden back when modal is hidden
         modalElement.setAttribute('aria-hidden', 'true');
-        
+
         try {
             // Remove inert from main content
             const mainContent = document.querySelector('main');
@@ -2641,8 +2636,8 @@ function markRowChanged(row) {
 }
 
 // ... existing code ...
-window.showNumberWheelX = function(inputElement) { showHajiriXYPoup(inputElement, 'X'); };
-window.showNumberWheelY = function(inputElement) { showHajiriXYPoup(inputElement, 'Y'); };
+window.showNumberWheelX = function (inputElement) { showHajiriXYPoup(inputElement, 'X'); };
+window.showNumberWheelY = function (inputElement) { showHajiriXYPoup(inputElement, 'Y'); };
 
 function showHajiriXYPoup(inputElement, focusField) {
     // If a popup is already open, remove it
@@ -2650,7 +2645,7 @@ function showHajiriXYPoup(inputElement, focusField) {
     if (existingPopup) {
         existingPopup.parentNode.removeChild(existingPopup);
     }
-    
+
     const row = inputElement.closest('tr');
     const workerName = row.cells[1]?.textContent || 'Unnamed';
     const paBtn = row.querySelector('.pa-toggle-btn');
@@ -2686,7 +2681,7 @@ function showHajiriXYPoup(inputElement, focusField) {
             </div>
         </div>
     `;
-    
+
     // Add styles for the custom popup
     if (!document.getElementById('hajiri-xy-custom-styles')) {
         const styleElement = document.createElement('style');
@@ -2814,10 +2809,10 @@ function showHajiriXYPoup(inputElement, focusField) {
         `;
         document.head.appendChild(styleElement);
     }
-    
+
     // Append the popup to the body
     document.body.insertAdjacentHTML('beforeend', popupHTML);
-    
+
     // Get the popup and its elements
     const popup = document.querySelector('.hajiri-xy-custom-popup');
     const xBox = popup.querySelector('.hajiri-x-custom');
@@ -2829,10 +2824,10 @@ function showHajiriXYPoup(inputElement, focusField) {
 
     // Only allow numeric input, no leading zero
     [xBox, yBox].forEach(box => {
-        box.addEventListener('focus', function() {
+        box.addEventListener('focus', function () {
             if (this.value === '0') this.value = '';
         });
-        box.addEventListener('input', function() {
+        box.addEventListener('input', function () {
             this.value = this.value.replace(/^0+(?!$)/, '').replace(/[^0-9]/g, '');
             // Live update hours in table
             xInput.value = xBox.value || '0';
@@ -2846,13 +2841,13 @@ function showHajiriXYPoup(inputElement, focusField) {
     });
 
     // Enter key navigation
-    xBox.addEventListener('keydown', function(e) {
+    xBox.addEventListener('keydown', function (e) {
         if (e.key === 'Enter') {
             yBox.focus();
             e.preventDefault();
         }
     });
-    yBox.addEventListener('keydown', function(e) {
+    yBox.addEventListener('keydown', function (e) {
         if (e.key === 'Enter') {
             closePopup();
             // Move to next present worker's X if possible
@@ -2868,13 +2863,13 @@ function showHajiriXYPoup(inputElement, focusField) {
             e.preventDefault();
         }
     });
-    
+
     // Close popup function
     function closePopup() {
         if (popup && popup.parentNode) {
             popup.parentNode.removeChild(popup);
         }
-        
+
         // Return focus to the input element
         if (inputElement && typeof inputElement.focus === 'function') {
             try {
@@ -2889,15 +2884,15 @@ function showHajiriXYPoup(inputElement, focusField) {
 
     // Button handlers
     popup.querySelector('.hajiri-xy-custom-close').addEventListener('click', closePopup);
-    
-    popup.querySelector('.hajiri-xy-custom-set').addEventListener('click', function() {
+
+    popup.querySelector('.hajiri-xy-custom-set').addEventListener('click', function () {
         xInput.value = xBox.value || '0';
         yInput.value = yBox.value || '0';
         markRowChanged(row);
         closePopup();
     });
-    
-    popup.querySelector('.hajiri-xy-custom-prev').addEventListener('click', function() {
+
+    popup.querySelector('.hajiri-xy-custom-prev').addEventListener('click', function () {
         closePopup();
         // Move to previous present worker's Y if possible
         let prevRow = row.previousElementSibling;
@@ -2910,8 +2905,8 @@ function showHajiriXYPoup(inputElement, focusField) {
             }, 300);
         }
     });
-    
-    popup.querySelector('.hajiri-xy-custom-next').addEventListener('click', function() {
+
+    popup.querySelector('.hajiri-xy-custom-next').addEventListener('click', function () {
         closePopup();
         // Move to next present worker's X if possible
         let nextRow = row.nextElementSibling;
@@ -2924,9 +2919,9 @@ function showHajiriXYPoup(inputElement, focusField) {
             }, 300);
         }
     });
-    
+
     // Close when clicking outside
-    popup.addEventListener('click', function(e) {
+    popup.addEventListener('click', function (e) {
         if (e.target === popup) {
             closePopup();
         }
@@ -2976,7 +2971,7 @@ function backupAttendanceToLocalStorage() {
             // Make sure to capture P/A status properly
             const paBtn = row.querySelector('.pa-toggle-btn');
             const hajiriPA = paBtn ? paBtn.textContent : 'A';
-            
+
             const backup = {
                 workerId: row.dataset.workerId,
                 hajiriPA: hajiriPA,
@@ -2995,7 +2990,7 @@ function backupAttendanceToLocalStorage() {
         };
         localStorage.setItem(`attendance_backup_${date}`, JSON.stringify(draftObj));
         console.log('Attendance state backed up to localStorage');
-        
+
         // Show the load draft button since we now have a draft
         const loadDraftBtn = document.getElementById('load-draft-btn');
         if (loadDraftBtn) loadDraftBtn.style.display = 'block';
@@ -3008,13 +3003,13 @@ function restoreAttendanceFromLocalStorage() {
     try {
         const date = document.getElementById('attendance-date')?.value || new Date().toISOString().split('T')[0];
         const backupJson = localStorage.getItem(`attendance_backup_${date}`);
-        
+
         // Update the load draft button visibility - always show it
         const loadDraftBtn = document.getElementById('load-draft-btn');
         if (loadDraftBtn) {
             loadDraftBtn.style.display = 'block';
         }
-        
+
         if (!backupJson) return false;
 
         // Parse the backup, handling both old and new format
@@ -3047,14 +3042,14 @@ function restoreAttendanceFromLocalStorage() {
             const paBtn = row.querySelector('.pa-toggle-btn');
             if (paBtn && paBtn.textContent !== backup.hajiriPA) {
                 paBtn.textContent = backup.hajiriPA;
-                
+
                 // Apply proper styling based on P/A status
                 if (backup.hajiriPA === 'P') {
                     paBtn.classList.remove('btn-danger');
                     paBtn.classList.add('btn-success');
                     row.classList.remove('table-secondary');
                     row.style.background = '#fff';
-                    
+
                     // Enable hajiri inputs
                     row.querySelectorAll('.hajiri-x, .hajiri-y').forEach(input => {
                         input.removeAttribute('disabled');
@@ -3065,14 +3060,14 @@ function restoreAttendanceFromLocalStorage() {
                     paBtn.classList.add('btn-danger');
                     row.classList.add('table-secondary');
                     row.style.background = '';
-                    
+
                     // Disable hajiri inputs
                     row.querySelectorAll('.hajiri-x, .hajiri-y').forEach(input => {
                         input.setAttribute('disabled', '');
                         input.style.background = '#eee';
                     });
                 }
-                
+
                 row.classList.add('table-warning');
                 restoredCount++;
             }
@@ -3123,14 +3118,14 @@ function restoreAttendanceFromLocalStorage() {
 function cleanupOldDrafts() {
     const now = Date.now();
     const sevenDays = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
-    
+
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key && key.startsWith('attendance_backup_')) {
             try {
                 const item = localStorage.getItem(key);
                 if (!item) continue;
-                
+
                 const parsed = JSON.parse(item);
                 // Check if it's the new format with timestamp
                 if (parsed && parsed.savedAt && (now - parsed.savedAt > sevenDays)) {
@@ -3145,38 +3140,38 @@ function cleanupOldDrafts() {
 }
 
 // Call cleanup on page load
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Add this line at the beginning of your existing DOMContentLoaded handler
     cleanupOldDrafts();
-    
+
     // ... rest of your existing DOMContentLoaded code ...
 });
 
 // Update the load attendance function to still restore on page load but not right after saving
 const originalLoadAttendance = loadAttendance;
-loadAttendance = function() {
+loadAttendance = function () {
     try {
         // Call the original function but handle the case where it might not return a Promise
         const result = originalLoadAttendance();
-        
+
         // If it returns a Promise, chain our restore function
         if (result && typeof result.then === 'function') {
             // We'll check if we just saved a draft before attempting to restore
             if (!window.justSavedDraft) {
-            return result.then(() => {
-                // After loading attendance from server, try to restore any local changes
-                setTimeout(() => {
-                    restoreAttendanceFromLocalStorage();
-                }, 500); // Give time for the table to render
-            })
-            .catch(error => {
-                console.error('Error in loadAttendance:', error);
-                // Still try to restore from localStorage even if server load fails
-                setTimeout(() => {
-                    restoreAttendanceFromLocalStorage();
-                }, 500);
-            });
-        } else {
+                return result.then(() => {
+                    // After loading attendance from server, try to restore any local changes
+                    setTimeout(() => {
+                        restoreAttendanceFromLocalStorage();
+                    }, 500); // Give time for the table to render
+                })
+                    .catch(error => {
+                        console.error('Error in loadAttendance:', error);
+                        // Still try to restore from localStorage even if server load fails
+                        setTimeout(() => {
+                            restoreAttendanceFromLocalStorage();
+                        }, 500);
+                    });
+            } else {
                 console.log('Skipping auto-restoration because we just saved a draft');
                 // Reset the flag after a short delay
                 setTimeout(() => {
@@ -3187,9 +3182,9 @@ loadAttendance = function() {
         } else {
             // If it doesn't return a Promise, only restore if we didn't just save
             if (!window.justSavedDraft) {
-            setTimeout(() => {
-                restoreAttendanceFromLocalStorage();
-            }, 1000);
+                setTimeout(() => {
+                    restoreAttendanceFromLocalStorage();
+                }, 1000);
             } else {
                 console.log('Skipping auto-restoration because we just saved a draft');
                 // Reset the flag after a short delay
@@ -3197,7 +3192,7 @@ loadAttendance = function() {
                     window.justSavedDraft = false;
                 }, 2000);
             }
-            
+
             // Return a resolved Promise to maintain the interface
             return Promise.resolve();
         }
@@ -3214,31 +3209,31 @@ loadAttendance = function() {
 // Improved error catch for saveAllAttendance function
 function handleApiError(error, response) {
     console.error('API Error:', error);
-    
+
     // If we have a response object, try to extract more info
     if (response) {
         console.error('Response status:', response.status);
-        
+
         try {
             console.error('Response headers:', response.headers);
         } catch (e) {
             console.error('Could not log response headers:', e);
         }
-        
+
         // Try to get the response body
         return response.text()
             .then(text => {
                 let errorMessage = '';
-                
+
                 try {
                     // Check if the response is HTML
-                    if (text.trim().toLowerCase().startsWith('<!doctype') || 
+                    if (text.trim().toLowerCase().startsWith('<!doctype') ||
                         text.trim().toLowerCase().startsWith('<html')) {
                         console.log('Received HTML response instead of JSON');
-                        
+
                         // Try to extract error message from HTML if possible
                         let errorMsg = 'HTML response received instead of JSON';
-                        
+
                         // Try to extract error from various HTML elements
                         const errorMatches = [
                             text.match(/<title[^>]*>(.*?)<\/title>/i),
@@ -3246,24 +3241,24 @@ function handleApiError(error, response) {
                             text.match(/<p class="error"[^>]*>(.*?)<\/p>/i),
                             text.match(/<div class="error"[^>]*>(.*?)<\/div>/i)
                         ];
-                        
+
                         for (const match of errorMatches) {
                             if (match && match[1]) {
                                 errorMsg = match[1].trim();
                                 break;
                             }
                         }
-                        
+
                         return `Server Error (${response.status}): ${errorMsg}`;
                     }
-                    
+
                     // Try to parse as JSON
                     const json = JSON.parse(text);
                     console.error('Response body (JSON):', json);
-                    
+
                     // Build a more detailed error message
                     errorMessage = json.message || 'Unknown server error';
-                    
+
                     // Add additional details if available
                     if (json.errors && Array.isArray(json.errors)) {
                         errorMessage += ': ' + json.errors.map(e => e.message || e).join(', ');
@@ -3272,13 +3267,13 @@ function handleApiError(error, response) {
                     } else if (json.error) {
                         errorMessage += ': ' + json.error;
                     }
-                    
+
                     return `Server Error (${response.status}): ${errorMessage}`;
                 } catch (e) {
                     // Not JSON, show as text
                     console.error('Response is not valid JSON:', e);
                     console.error('Raw response text (first 200 chars):', text.substring(0, 200));
-                    
+
                     // If text is short enough, just use it directly
                     if (text.length < 100) {
                         return `Server Error (${response.status}): ${text.trim()}`;
@@ -3292,7 +3287,7 @@ function handleApiError(error, response) {
                 return `Server Error (${response.status}): Failed to read response body`;
             });
     }
-    
+
     return Promise.resolve(error.message || 'Unknown error');
 }
 
@@ -3300,7 +3295,7 @@ function handleApiError(error, response) {
 function handleDateChange() {
     const dateInput = document.getElementById('attendance-date');
     const loadDraftBtn = document.getElementById('load-draft-btn');
-    
+
     if (dateInput && loadDraftBtn) {
         // Always show the load draft button
         loadDraftBtn.style.display = 'block';
@@ -3456,36 +3451,36 @@ function showCustomTimePicker(inputElement, onSetCallback) {
     popup.querySelector('.time-picker-custom-ok').addEventListener('click', () => {
         const time24 = format24Hour(selectedHour, selectedMinute, selectedPeriod);
         console.log('Time selected:', time24, 'for input:', inputElement.id);
-        
+
         // Temporarily remove readonly to ensure value can be set
         const wasReadOnly = inputElement.readOnly;
         if (wasReadOnly) {
             inputElement.removeAttribute('readonly');
         }
-        
+
         // Set the value directly using both property and attribute
         inputElement.value = time24;
         inputElement.setAttribute('value', time24);
         console.log('Set input value directly to:', time24);
-        
+
         // Force the input to visually update by triggering a focus and blur
         inputElement.focus();
         inputElement.blur();
-        
+
         // Restore readonly if it was set
         if (wasReadOnly) {
             inputElement.readOnly = true;
         }
-        
+
         // Trigger change event to notify other parts of the application
         const event = new Event('change', { bubbles: true });
         inputElement.dispatchEvent(event);
-        
+
         // Call the callback if provided
         if (typeof onSetCallback === 'function') {
             onSetCallback(time24);
         }
-        
+
         closePopup();
     });
 
@@ -3499,7 +3494,7 @@ function showCustomTimePicker(inputElement, onSetCallback) {
 }
 
 // Override the existing showInfiniteTimePicker function to use our custom implementation
-window.showInfiniteTimePicker = function(inputElement, onSetCallback) {
+window.showInfiniteTimePicker = function (inputElement, onSetCallback) {
     // Use our new wheel-based time picker
     showWheelTimePicker(inputElement, onSetCallback);
 };
@@ -3511,7 +3506,7 @@ function showHajiriTimePicker(inputElement, onSetCallback) {
     if (existingPopup) {
         existingPopup.parentNode.removeChild(existingPopup);
     }
-    
+
     // Create a custom popup without Bootstrap modal
     const popupHTML = `
         <div class="time-picker">
@@ -3529,7 +3524,7 @@ function showHajiriTimePicker(inputElement, onSetCallback) {
                 <!-- Hour Wheel -->
                 <div class="wheel">
                     <div class="wheel-scroller" id="hourWheel">
-                        ${Array.from({ length: 12 }, (_, i) => `<div class="wheel-item">${i+1}</div>`).join('')}
+                        ${Array.from({ length: 12 }, (_, i) => `<div class="wheel-item">${i + 1}</div>`).join('')}
                     </div>
                 </div>
 
@@ -3560,7 +3555,7 @@ function showHajiriTimePicker(inputElement, onSetCallback) {
         </div>
         <div class="time-picker-backdrop"></div>
     `;
-    
+
     // Add styles for the custom popup
     if (!document.getElementById('hajiri-time-custom-styles')) {
         const styleElement = document.createElement('style');
@@ -3704,60 +3699,60 @@ function showHajiriTimePicker(inputElement, onSetCallback) {
         `;
         document.head.appendChild(styleElement);
     }
-    
+
     // Create container for the popup
     const container = document.createElement('div');
     container.className = 'time-picker-backdrop';
     container.innerHTML = popupHTML;
-    
+
     // Append the popup to the body
     document.body.appendChild(container);
-    
+
     // Get the popup and its elements
     const timeDisplay = container.querySelector('#timeDisplay');
     const hourWheel = container.querySelector('#hourWheel');
     const minuteWheel = container.querySelector('#minuteWheel');
     const periodWheel = container.querySelector('#periodWheel');
-    
+
     // Initialize with current time or parsed time from input
     let currentTime;
     if (inputElement && inputElement.value) {
         currentTime = parseTimeInput(inputElement.value);
     }
-    
+
     if (!currentTime) {
         currentTime = new Date();
     }
-    
+
     let selectedHour = currentTime.getHours() > 12 ? currentTime.getHours() - 12 : (currentTime.getHours() === 0 ? 12 : currentTime.getHours());
     let selectedMinute = currentTime.getMinutes();
     let selectedPeriod = currentTime.getHours() >= 12 ? 'PM' : 'AM';
-    
+
     // Update time display
     function updateTimeDisplay() {
         timeDisplay.textContent = `${selectedHour}:${selectedMinute.toString().padStart(2, '0')} ${selectedPeriod}`;
     }
-    
+
     // Function to parse time input
     function parseTimeInput(timeStr) {
         if (!timeStr) return new Date();
-        
+
         try {
             // Check if it's in 24-hour format (HH:MM)
             const [hours, minutes] = timeStr.split(':').map(Number);
-            
+
             if (isNaN(hours) || isNaN(minutes)) return new Date();
-            
+
             const date = new Date();
             date.setHours(hours, minutes, 0, 0);
-            
+
             return date;
         } catch (e) {
             console.error('Error parsing time:', e);
             return new Date();
         }
     }
-    
+
     // Function to handle infinite scroll for minutes
     function handleInfiniteScroll(container) {
         const scrollTop = container.scrollTop;
@@ -3775,15 +3770,15 @@ function showHajiriTimePicker(inputElement, onSetCallback) {
             container.scrollTop = (middleSection + sectionLength) * itemHeight - offset;
         }
     }
-    
+
     // Function to handle wheel scrolling
     function handleScroll(container, isHour = false, isMinute = false, isPeriod = false) {
         const scrollTop = container.scrollTop;
         const itemHeight = 45;
-        
+
         // Calculate selected index
         const selectedIndex = Math.round(scrollTop / itemHeight);
-        
+
         if (isHour) {
             selectedHour = selectedIndex + 1;
         } else if (isMinute) {
@@ -3792,13 +3787,13 @@ function showHajiriTimePicker(inputElement, onSetCallback) {
         } else if (isPeriod) {
             selectedPeriod = selectedIndex === 0 ? 'AM' : 'PM';
         }
-        
+
         // Visual updates for all items
         const children = container.children;
         for (let i = 0; i < children.length; i++) {
             const child = children[i];
             const distance = Math.abs(i - selectedIndex);
-            
+
             if (distance === 0) {
                 child.style.color = '#3b82f6';
                 child.style.fontWeight = '600';
@@ -3816,10 +3811,10 @@ function showHajiriTimePicker(inputElement, onSetCallback) {
                 child.style.opacity = '0.5';
             }
         }
-        
+
         // Update time display
         updateTimeDisplay();
-        
+
         // Snap to nearest item after scrolling stops
         clearTimeout(container.snapTimeout);
         container.snapTimeout = setTimeout(() => {
@@ -3832,11 +3827,11 @@ function showHajiriTimePicker(inputElement, onSetCallback) {
             }
         }, 150);
     }
-    
+
     // Function to scroll to a specific value
     function scrollToValue(container, value, isHour = false, isMinute = false, isPeriod = false) {
         let targetIndex;
-        
+
         if (isHour) {
             targetIndex = value - 1;
         } else if (isMinute) {
@@ -3845,7 +3840,7 @@ function showHajiriTimePicker(inputElement, onSetCallback) {
         } else if (isPeriod) {
             targetIndex = value === 'AM' ? 0 : 1;
         }
-        
+
         if (targetIndex !== undefined) {
             container.scrollTo({
                 top: targetIndex * 45,
@@ -3853,37 +3848,37 @@ function showHajiriTimePicker(inputElement, onSetCallback) {
             });
         }
     }
-    
+
     // Set initial wheel positions
     scrollToValue(hourWheel, selectedHour, true, false, false);
     scrollToValue(minuteWheel, selectedMinute, false, true, false);
     scrollToValue(periodWheel, selectedPeriod, false, false, true);
     updateTimeDisplay();
-    
+
     // Add scroll event listeners
     let scrollTimeout;
-    
+
     hourWheel.addEventListener('scroll', () => {
         clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => {
             handleScroll(hourWheel, true, false, false);
         }, 10);
     });
-    
+
     minuteWheel.addEventListener('scroll', () => {
         clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => {
             handleScroll(minuteWheel, false, true, false);
         }, 10);
     });
-    
+
     periodWheel.addEventListener('scroll', () => {
         clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => {
             handleScroll(periodWheel, false, false, true);
         }, 10);
     });
-    
+
     // Add click listeners for wheel items
     hourWheel.querySelectorAll('.wheel-item').forEach((item, index) => {
         item.addEventListener('click', () => {
@@ -3892,7 +3887,7 @@ function showHajiriTimePicker(inputElement, onSetCallback) {
             updateTimeDisplay();
         });
     });
-    
+
     minuteWheel.querySelectorAll('.wheel-item').forEach((item, index) => {
         item.addEventListener('click', () => {
             selectedMinute = index % 60;
@@ -3900,7 +3895,7 @@ function showHajiriTimePicker(inputElement, onSetCallback) {
             updateTimeDisplay();
         });
     });
-    
+
     periodWheel.querySelectorAll('.wheel-item').forEach((item, index) => {
         item.addEventListener('click', () => {
             selectedPeriod = index === 0 ? 'AM' : 'PM';
@@ -3908,18 +3903,18 @@ function showHajiriTimePicker(inputElement, onSetCallback) {
             updateTimeDisplay();
         });
     });
-    
+
     // Close popup function
     function closePopup() {
         if (container && container.parentNode) {
             container.parentNode.removeChild(container);
         }
     }
-    
+
     // Button handlers
     container.querySelector('#timePickerCancel').addEventListener('click', closePopup);
-    
-    container.querySelector('#timePickerOk').addEventListener('click', function() {
+
+    container.querySelector('#timePickerOk').addEventListener('click', function () {
         // Format time in 24-hour format for value
         let hours24 = selectedHour;
         if (selectedPeriod === 'PM' && selectedHour < 12) {
@@ -3927,18 +3922,18 @@ function showHajiriTimePicker(inputElement, onSetCallback) {
         } else if (selectedPeriod === 'AM' && selectedHour === 12) {
             hours24 = 0;
         }
-        
+
         const time24 = `${hours24.toString().padStart(2, '0')}:${selectedMinute.toString().padStart(2, '0')}`;
-        
+
         if (typeof onSetCallback === 'function') {
             onSetCallback(time24);
         }
-        
+
         closePopup();
     });
-    
+
     // Close when clicking outside
-    container.addEventListener('click', function(e) {
+    container.addEventListener('click', function (e) {
         if (e.target === container) {
             closePopup();
         }

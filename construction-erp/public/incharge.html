@@ -1,28 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Construction ERP | Site Incharge Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Link to the external CSS file -->
     <link href="css/incharge.css" rel="stylesheet">
     <script src="/js/session-manager.js"></script>
 </head>
+
 <body>
+    <!-- Hamburger Button for Mobile -->
+    <button class="hamburger" id="hamburgerBtn">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
     <!-- Overlay for mobile -->
     <div class="overlay" id="overlay"></div>
-    
-    <!-- Main App Container (flex layout with sidebar and content) -->
+
+    <!-- Main App Container -->
     <div class="app-container">
-            <!-- Sidebar -->
+        <!-- Sidebar -->
         <div class="sidebar" id="sidebar">
-            <button class="hamburger" id="hamburgerBtn">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
             <div class="sidebar-header">
                 <div class="hindi-greeting">नमस्ते!</div>
                 <div class="hindi-name" id="incharge-name">राम राम</div>
@@ -35,64 +41,139 @@
             </div>
             <nav class="menu">
                 <a class="nav-link active" href="#overview" data-section="overview-section">
-                    <span class="nav-text">Home</span>
+                    <i class="bi bi-grid-1x2-fill"></i> <span class="nav-text">Home</span>
                 </a>
                 <a class="nav-link" href="#approve-hajiri" data-section="approve-hajiri-section">
-                    <span class="nav-text">Approve Hajiri</span>
+                    <i class="bi bi-calendar2-check-fill"></i> <span class="nav-text">Approve Hajiri</span>
                 </a>
                 <a class="nav-link" href="#submitted-hajiri" data-section="submitted-hajiri-section">
-                    <span class="nav-text">Submitted Hajiri</span>
+                    <i class="bi bi-file-earmark-arrow-up-fill"></i> <span class="nav-text">Submitted Hajiri</span>
                 </a>
                 <a class="nav-link" href="#profile" data-section="profile-section">
-                    <span class="nav-text">प्रोफ़ाइल</span>
+                    <i class="bi bi-person-circle"></i> <span class="nav-text">प्रोफ़ाइल</span>
                 </a>
                 <a class="logout-button" href="#" onclick="logout()">
-                    <span class="nav-text">लॉग आउट</span>
+                    <i class="bi bi-box-arrow-right"></i> <span class="nav-text">लॉग आउट</span>
                 </a>
             </nav>
-            </div>
+        </div>
 
         <!-- Main content -->
         <div id="content-wrapper" class="content-wrapper">
             <div class="container-fluid">
                 <!-- Overview Section -->
                 <div id="overview-section" class="section active">
-                    <h2 class="mb-4">Dashboard Overview</h2>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="mb-0">Dashboard Overview</h2>
+                        <button class="btn btn-outline-primary" onclick="initializeDashboard()">
+                            <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+                        </button>
+                    </div>
+
+                    <!-- Stats Cards -->
                     <div class="row mb-4">
-                        <div class="col-md-4">
-                            <div class="stats-card border-primary">
-                                <h2 id="total-foremen">0</h2>
-                                <p>कुल फोरमैन</p>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="stats-card bg-primary text-white">
+                                <div class="stats-icon">
+                                    <i class="bi bi-building"></i>
+                                </div>
+                                <div class="stats-content">
+                                    <h3 id="total-sites">0</h3>
+                                    <p>Total Sites</p>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="stats-card border-warning">
-                                <h2 id="pending-approvals">0</h2>
-                                <p>लंबित हाज़िरी</p>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="stats-card bg-success text-white">
+                                <div class="stats-icon">
+                                    <i class="bi bi-people"></i>
+                                </div>
+                                <div class="stats-content">
+                                    <h3 id="total-foremen">0</h3>
+                                    <p>Total Foremen</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="stats-card bg-warning text-white">
+                                <div class="stats-icon">
+                                    <i class="bi bi-clock-history"></i>
+                                </div>
+                                <div class="stats-content">
+                                    <h3 id="pending-approvals">0</h3>
+                                    <p>Pending Approvals</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="stats-card bg-info text-white">
+                                <div class="stats-icon">
+                                    <i class="bi bi-check-circle"></i>
+                                </div>
+                                <div class="stats-content">
+                                    <h3 id="verified-today">0</h3>
+                                    <p>Verified Today</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    
+
+                    <!-- Sites Overview -->
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="bi bi-building me-2"></i>Sites Overview
+                            </h5>
+                            <div class="d-flex align-items-center">
+                                <input type="date" id="overview-date" class="form-control form-control-sm me-2"
+                                    onchange="loadSitesOverview()">
+                                <button class="btn btn-sm btn-outline-primary" onclick="loadSitesOverview()">
+                                    <i class="bi bi-search"></i>
+                                    <span class="visually-hidden">Search sites overview</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="sites-overview-container">
+                                <div class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="mt-2 mb-0">Loading sites overview...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Foremen List -->
                     <div class="card">
                         <div class="card-header">
-                            <h3>Your Foremen</h3>
+                            <h5 class="mb-0">
+                                <i class="bi bi-people me-2"></i>Your Foremen
+                            </h5>
                         </div>
                         <div class="card-body">
-                        <div class="table-responsive">
+                            <div class="table-responsive">
                                 <table class="table table-hover">
                                     <thead>
                                         <tr>
-                                            <th>Name</th>
+                                            <th>Foreman</th>
                                             <th>Site</th>
-                                            <th>Pending Hajiri</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
+                                            <th class="text-center">Pending</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
                                     <tbody id="foremen-list">
                                         <!-- Foremen will be loaded here -->
-                                </tbody>
-                            </table>
+                                        <tr>
+                                            <td colspan="4" class="text-center py-4">
+                                                <div class="spinner-border spinner-border-sm text-primary me-2"
+                                                    role="status"></div>
+                                                Loading foremen...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -130,7 +211,6 @@
                                         </tr>
                                     </thead>
                                     <tbody id="submissionsList">
-                                        <!-- Submissions will be loaded here -->
                                         <tr>
                                             <td colspan="7" class="text-center py-4">
                                                 <i class="bi bi-info-circle me-2"></i>
@@ -140,10 +220,10 @@
                                     </tbody>
                                 </table>
                             </div>
-                            </div>
                         </div>
                     </div>
-                    
+                </div>
+
                 <!-- Submitted Hajiri Section -->
                 <div id="submitted-hajiri-section" class="section">
                     <h2 class="mb-4">Submitted Hajiri Records</h2>
@@ -163,6 +243,9 @@
                                     </thead>
                                     <tbody id="submitted-hajiri-table">
                                         <!-- Last 5 submitted hajiri records will be loaded here -->
+                                        <tr>
+                                            <td colspan="6" class="text-center">Loading records...</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -211,25 +294,29 @@
                 <div class="modal-body">
                     <div class="submission-info mb-4 p-3 bg-light rounded">
                         <div class="row">
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <p class="mb-1"><strong>Foreman:</strong></p>
                                 <p id="submission-foreman" class="mb-0">-</p>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <p class="mb-1"><strong>Site:</strong></p>
                                 <p id="submission-site" class="mb-0">-</p>
                             </div>
                             <div class="col-md-3">
                                 <p class="mb-1"><strong>Date:</strong></p>
                                 <p id="submission-date" class="mb-0">-</p>
-                        </div>
+                            </div>
+                            <div class="col-md-2">
+                                <p class="mb-1"><strong>In Time:</strong></p>
+                                <p id="submission-in-time" class="mb-0">-</p>
+                            </div>
                             <div class="col-md-3">
-                                <p class="mb-1"><strong>Submission Time:</strong></p>
-                                <p id="submission-time" class="mb-0">-</p>
+                                <p class="mb-1"><strong>Out Time:</strong></p>
+                                <p id="submission-out-time" class="mb-0">-</p>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="table-responsive">
                         <table class="table table-striped table-hover">
                             <thead>
@@ -255,18 +342,16 @@
                             </tbody>
                         </table>
                     </div>
-                    
+
                     <div class="mt-3">
                         <label for="approval-comments" class="form-label">Comments (Optional)</label>
-                        <textarea class="form-control" id="approval-comments" rows="2" placeholder="Add any comments or notes about this submission"></textarea>
+                        <textarea class="form-control" id="approval-comments" rows="2"
+                            placeholder="Add any comments or notes about this submission"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <input type="hidden" id="submission-id">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-warning" onclick="rejectSubmission()">
-                        <i class="bi bi-arrow-return-left me-1"></i> Return to Foreman
-                    </button>
                     <button type="button" class="btn btn-success" onclick="approveSubmission()">
                         <i class="bi bi-check-circle me-1"></i> Approve
                     </button>
@@ -274,128 +359,81 @@
             </div>
         </div>
     </div>
-    
-    <style>
-    .app-container {
-        display: flex;
-        min-height: 100vh;
-    }
 
-    .sidebar {
-        width: 250px;
-        background-color: #343a40;
-        color: white;
-        padding: 1rem;
-        transition: transform 0.3s ease;
-    }
+    <!-- Edit Attendance Modal -->
+    <div class="modal fade" id="editAttendanceModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Attendance Record</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-attendance-form">
+                        <input type="hidden" id="edit-attendance-id">
+                        <input type="hidden" id="edit-worker-id">
 
-    .content-wrapper {
-        flex: 1;
-        padding: 2rem;
-        background-color: #f8f9fa;
-    }
+                        <div class="mb-3">
+                            <label for="edit-worker-name" class="form-label">Worker Name</label>
+                            <input type="text" class="form-control" id="edit-worker-name" readonly>
+                        </div>
 
-    .hamburger {
-        display: none;
-        background: none;
-        border: none;
-        color: white;
-        padding: 0.5rem;
-        cursor: pointer;
-    }
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="edit-status"
+                                        id="edit-status-present" value="present">
+                                    <label class="form-check-label" for="edit-status-present">Present</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="edit-status"
+                                        id="edit-status-absent" value="absent">
+                                    <label class="form-check-label" for="edit-status-absent">Absent</label>
+                                </div>
+                            </div>
+                        </div>
 
-    .hamburger span {
-        display: block;
-        width: 25px;
-        height: 3px;
-        background-color: white;
-        margin: 5px 0;
-        transition: 0.3s;
-    }
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="edit-hajiri-x" class="form-label">Hajiri X (Full Days)</label>
+                                    <input type="number" class="form-control" id="edit-hajiri-x" min="0" max="1"
+                                        onchange="updateWorkingHours()">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="edit-hajiri-y" class="form-label">Hajiri Y (Half Days)</label>
+                                    <input type="number" class="form-control" id="edit-hajiri-y" min="0" max="1"
+                                        onchange="updateWorkingHours()">
+                                </div>
+                            </div>
+                        </div>
 
-    .overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 998;
-    }
+                        <div class="mb-3">
+                            <label for="edit-working-hours" class="form-label">Working Hours</label>
+                            <input type="number" class="form-control" id="edit-working-hours" readonly>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveAttendanceEditWithHajiri()">
+                        <i class="bi bi-check-lg me-1"></i> Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    @media (max-width: 768px) {
-        .sidebar {
-            position: fixed;
-            left: -250px;
-            top: 0;
-            bottom: 0;
-            z-index: 999;
-        }
-
-        .hamburger {
-            display: block;
-            position: fixed;
-            top: 1rem;
-            left: 1rem;
-            z-index: 1000;
-        }
-
-        .sidebar.active {
-            transform: translateX(250px);
-        }
-
-        .overlay.active {
-            display: block;
-        }
-
-        .content-wrapper {
-            padding-top: 4rem;
-            margin-left: 0;
-        }
-    }
-
-    .logout-button {
-        display: inline-block;
-        background-color: #dc3545;
-        color: white;
-        padding: 10px 16px;
-        border-radius: 8px;
-        text-decoration: none;
-        font-weight: bold;
-        transition: background-color 0.3s ease, transform 0.2s ease;
-        margin-top: auto;
-    }
-
-    .logout-button:hover {
-        background-color: #bb2d3b;
-        transform: scale(1.05);
-        color: white;
-        text-decoration: none;
-    }
-
-    .stats-card {
-        padding: 1.5rem;
-        border-radius: 10px;
-        background: white;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        margin-bottom: 1rem;
-    }
-
-    .stats-card h2 {
-        font-size: 2.5rem;
-        margin-bottom: 0.5rem;
-        color: #0d6efd;
-    }
-
-    .stats-card p {
-        margin: 0;
-        color: #6c757d;
-    }
-    </style>
-
-    <!-- Bootstrap Bundle with Popper -->
+    <!-- Bootstrap JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Main JavaScript -->
     <script src="js/incharge.js"></script>
+
+    <!-- Hamburger menu is handled by incharge.js -->
 </body>
-</html> 
+
+</html>

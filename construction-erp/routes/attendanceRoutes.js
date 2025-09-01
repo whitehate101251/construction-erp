@@ -15,6 +15,9 @@ router.post('/mark-out', attendanceController.markOutTime);
 // Add attendance manually (for site managers)
 router.post('/add', attendanceController.addAttendance);
 
+// Add attendance (alternative endpoint for compatibility)
+router.post('/', attendanceController.addAttendance);
+
 // Get attendance for a site
 router.get('/site/:siteId', attendanceController.getSiteAttendance);
 
@@ -36,8 +39,7 @@ router.get('/sites-with-attendance', attendanceController.getSitesWithAttendance
 // Verify attendance records
 router.post('/verify', attendanceController.verifyAttendance);
 
-// Reject attendance records
-router.post('/reject', attendanceController.rejectAttendance);
+// Reject attendance functionality removed - only approve option available
 
 // Modify attendance record (for site incharge)
 router.post('/modify', attendanceController.modifyAttendance);

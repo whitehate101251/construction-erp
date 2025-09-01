@@ -193,7 +193,7 @@ mongoose.connect(process.env.MONGODB_URI)
     .then(async () => {
         console.log('Successfully connected to MongoDB');
         await createAdminIfNotExists();
-        const PORT = 3000; // Use a different port
+        const PORT = process.env.PORT || 3000;
         app.listen(PORT, '0.0.0.0', () => { // Listen on all interfaces
             console.log(`Server running on port ${PORT}`);
             console.log(`Local URL: http://localhost:${PORT}`);

@@ -1,18 +1,16 @@
 // Site Incharge Dashboard JavaScript
-// Handles attendance verification with enhanced time formatting and features
+// Real API integration with enhanced UI/UX
 
-// DOM Elements
-const sidebar = document.getElementById('sidebar');
-const hamburgerBtn = document.getElementById('hamburgerBtn');
-const overlay = document.getElementById('overlay');
-const inchargeName = document.getElementById('incharge-name');
-const totalForemen = document.getElementById('total-foremen');
-const pendingApprovals = document.getElementById('pending-approvals');
-const foremenList = document.getElementById('foremen-list');
-const submittedHajiriTable = document.getElementById('submitted-hajiri-table');
-
-// Current language state
+// Configuration
+const API_BASE_URL = window.location.origin + '/api';
+const API_URL = window.location.origin + '/api'; // For backward compatibility
+let currentUser = null;
 let currentLanguage = 'hi';
+
+// DOM Elements - will be initialized after DOM loads
+let sidebar, hamburgerBtn, overlay, inchargeName;
+let totalSites, totalForemen, pendingApprovals, verifiedToday;
+let foremenList, submittedHajiriTable;
 
 // Translations
 const translations = {
@@ -68,21 +66,50 @@ const translations = {
     }
 };
 
-// Initialize the dashboard
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("Incharge dashboard initializing...");
-    
+// Initialize Dashboard
+document.addEventListener('DOMContentLoaded', function () {
+    console.log("Site Incharge dashboard initializing...");
+
+    // Check authentication first
+    const token = localStorage.getItem('token');
+    if (!token) {
+        console.error('No authentication token found. Redirecting to login.');
+        window.location.href = '/login.html';
+        return;
+    }
+
+
+
+    // Initialize DOM elements
+    sidebar = document.getElementById('sidebar');
+    hamburgerBtn = document.getElementById('hamburgerBtn');
+    overlay = document.getElementById('overlay');
+    inchargeName = document.getElementById('incharge-name');
+
+    // Initialize stats elements
+    totalSites = document.getElementById('total-sites');
+    totalForemen = document.getElementById('total-foremen');
+    pendingApprovals = document.getElementById('pending-approvals');
+    verifiedToday = document.getElementById('verified-today');
+
+    // Initialize list elements
+    foremenList = document.getElementById('foremen-list');
+    submittedHajiriTable = document.getElementById('submitted-hajiri-table');
+
     // Setup mobile menu
     setupMobileMenu();
-    
-    // Setup event listeners for navigation
+
+    // Setup navigation
     setupNavigation();
-    
+
     // Check authentication
     checkAuth();
-    
-    // Initialize the page with dummy data for now
-    initializeDummyData();
+
+    // Initialize dashboard with real data
+    initializeDashboard();
+
+    // Set default dates
+    setDefaultDates();
 });
 
 // Setup mobile menu
@@ -91,48 +118,53 @@ function setupMobileMenu() {
     console.log("hamburgerBtn:", hamburgerBtn);
     console.log("sidebar:", sidebar);
     console.log("overlay:", overlay);
-    
+
     if (hamburgerBtn) {
-        hamburgerBtn.addEventListener('click', function() {
-            console.log("Hamburger clicked");
+        hamburgerBtn.addEventListener('click', function () {
+            console.log("Hamburger clicked!");
             if (sidebar) sidebar.classList.toggle('active');
             if (overlay) overlay.classList.toggle('active');
         });
+    } else {
+        console.error("Hamburger button not found!");
     }
-    
+
     if (overlay) {
-        overlay.addEventListener('click', function() {
-            console.log("Overlay clicked");
+        overlay.addEventListener('click', function () {
+            console.log("Overlay clicked!");
             if (sidebar) sidebar.classList.remove('active');
             if (overlay) overlay.classList.remove('active');
         });
+    } else {
+        console.error("Overlay not found!");
     }
 }
 
 // Setup navigation
 function setupNavigation() {
-    document.querySelectorAll('.nav-link').forEach(link => {
+    const navLinks = document.querySelectorAll('.nav-link');
+    
+    navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const targetSection = link.getAttribute('data-section');
-            console.log("Navigation clicked:", targetSection);
-            
+
             // Update active states
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             link.classList.add('active');
-            
+
             // Show target section
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.remove('active');
             });
-            
+
             const targetElement = document.getElementById(targetSection);
             if (targetElement) {
                 targetElement.classList.add('active');
             } else {
                 console.warn("Target section not found:", targetSection);
             }
-            
+
             // Close mobile menu if open
             if (window.innerWidth <= 768) {
                 if (sidebar) sidebar.classList.remove('active');
@@ -145,55 +177,136 @@ function setupNavigation() {
 // Check authentication
 function checkAuth() {
     const token = localStorage.getItem('token');
-    if (!token) {
-        // If testing locally, continue without redirection
-        console.log("No auth token found, using dummy data");
+    const userStr = localStorage.getItem('user');
+
+    if (!token || !userStr) {
+        console.log("No authentication found, redirecting to login");
+        window.location.href = '/login.html';
         return;
     }
-    
-    // Check user role from localStorage
+
     try {
-    const user = JSON.parse(localStorage.getItem('user'));
-        if (!user || user.role !== 'site_incharge') {
-            console.log("User is not a site incharge, using dummy data");
-        return;
-    }
-    
+        currentUser = JSON.parse(userStr);
+        if (currentUser.role !== 'site_incharge') {
+            console.log("User is not a site incharge");
+            alert('Access denied. You must be a site incharge to access this page.');
+            window.location.href = '/login.html';
+            return;
+        }
+
         // Display user name
         if (inchargeName) {
-            inchargeName.textContent = user.name || 'Site Incharge';
+            inchargeName.textContent = currentUser.name || 'साइट इंचार्ज';
         }
-        
-        // Load user profile
-        loadUserProfile(user);
-        
+
     } catch (error) {
-        console.error('Error checking auth:', error);
-        // Continue with dummy data for testing
+        console.error('Error parsing user data:', error);
+        window.location.href = '/login.html';
     }
 }
 
-// Initialize with dummy data for now
-function initializeDummyData() {
-    console.log("Initializing with dummy data");
-    
-    // Update language content
-    updateLanguageContent();
-    
-    // Set dummy data for stats
-    if (totalForemen) totalForemen.textContent = '3';
-    if (pendingApprovals) pendingApprovals.textContent = '5';
-    
-    // Load dummy foremen data
-    loadDummyForemen();
-    
-    // Load dummy submitted hajiri
-    loadDummySubmittedHajiri();
-    
-    // Set date for submission date input if it exists
-    const submissionDateInput = document.getElementById('submissionDate');
-    if (submissionDateInput) {
-        submissionDateInput.value = new Date().toISOString().split('T')[0];
+// Get auth headers
+function getAuthHeaders() {
+    const token = localStorage.getItem('token');
+    return {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+    };
+}
+
+// Get auth header (for backward compatibility)
+function getAuthHeader() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        console.warn('No authentication token found');
+        return '';
+    }
+    return `Bearer ${token}`;
+}
+
+// Initialize dashboard with real data
+async function initializeDashboard() {
+    showLoading();
+    try {
+        await loadDashboardData();
+        await loadSitesOverview();
+        await loadRecentSubmissions();
+    } catch (error) {
+        console.error('Error initializing dashboard:', error);
+        showError('Failed to load dashboard data');
+    } finally {
+        hideLoading();
+    }
+}
+
+// Load dashboard statistics
+async function loadDashboardData() {
+    try {
+        // Load sites assigned to this incharge
+        const sitesResponse = await fetch(`${API_BASE_URL}/sites`, {
+            headers: getAuthHeaders()
+        });
+
+        if (sitesResponse.ok) {
+            const sitesData = await sitesResponse.json();
+            const sites = sitesData.data?.sites || sitesData.data || [];
+
+            // Update stats
+            if (totalSites) {
+                totalSites.textContent = sites.length;
+            }
+
+            // Count total foremen across all sites
+            let foremenCount = 0;
+            sites.forEach(site => {
+                if (site.siteManager) foremenCount++;
+                if (site.additionalForemen) foremenCount += site.additionalForemen.length;
+            });
+            if (totalForemen) totalForemen.textContent = foremenCount;
+
+            // Get pending approvals count
+            let totalPending = 0;
+            for (const site of sites) {
+                try {
+                    const pendingResponse = await fetch(`${API_BASE_URL}/attendance/pending-verification?site=${site._id}`, {
+                        headers: getAuthHeaders()
+                    });
+                    if (pendingResponse.ok) {
+                        const pendingData = await pendingResponse.json();
+                        totalPending += pendingData.count || 0;
+                    }
+                } catch (error) {
+                    console.error('Error fetching pending count for site:', site._id, error);
+                }
+            }
+            if (pendingApprovals) pendingApprovals.textContent = totalPending;
+
+            // Get today's verified count
+            const today = new Date().toISOString().split('T')[0];
+            const verifiedResponse = await fetch(`${API_BASE_URL}/attendance?verified=true&date=${today}`, {
+                headers: getAuthHeaders()
+            });
+
+            if (verifiedResponse.ok) {
+                const verifiedData = await verifiedResponse.json();
+                const verifiedCount = verifiedData.data?.attendance?.length || 0;
+                if (verifiedToday) verifiedToday.textContent = verifiedCount;
+            }
+
+            // Check if site incharge has any sites assigned
+            if (sites.length === 0) {
+                showNotification("No sites assigned to your account. Please contact admin to assign sites.", 'warning');
+            }
+
+            // Load foremen list
+            await loadForemenList(sites);
+        } else {
+            // Show error message to user
+            showNotification(`Failed to load sites: ${sitesResponse.status} ${sitesResponse.statusText}`, 'error');
+        }
+    } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        showError('Failed to load dashboard statistics');
     }
 }
 
@@ -202,112 +315,447 @@ function loadUserProfile(user) {
     const nameInput = document.getElementById('name');
     const emailInput = document.getElementById('email');
     const phoneInput = document.getElementById('phone');
-    
+
     if (nameInput) nameInput.value = user.name || '';
     if (emailInput) emailInput.value = user.email || '';
     if (phoneInput) phoneInput.value = user.phone || '';
 }
 
-// Load dummy foremen data
-function loadDummyForemen() {
+// Load foremen list from sites
+async function loadForemenList(sites) {
     if (!foremenList) {
         console.warn("Foremen list element not found");
         return;
     }
-    
-    const dummyForemen = [
-        { id: '1', name: 'Rajesh Kumar', site: 'Delhi Site', pendingHajiri: 2 },
-        { id: '2', name: 'Sunil Sharma', site: 'Mumbai Project', pendingHajiri: 1 },
-        { id: '3', name: 'Amit Singh', site: 'Bangalore Construction', pendingHajiri: 2 }
-    ];
-    
-    foremenList.innerHTML = dummyForemen.map(foreman => `
-        <tr>
-            <td>${foreman.name}</td>
-            <td>${foreman.site}</td>
-            <td>${foreman.pendingHajiri}</td>
-            <td>
-                <button class="btn btn-sm btn-primary" onclick="viewForeman('${foreman.id}')">
-                    ${translations[currentLanguage].view}
-                </button>
-            </td>
-        </tr>
-    `).join('');
+
+    try {
+        const foremenData = [];
+
+        for (const site of sites) {
+            // Add primary site manager
+            if (site.siteManager) {
+                const pendingCount = await getPendingVerificationCount(site._id);
+                foremenData.push({
+                    id: site.siteManager._id,
+                    name: site.siteManager.name,
+                    site: site.name,
+                    siteId: site._id,
+                    pendingHajiri: pendingCount,
+                    phone: site.siteManager.phone || 'N/A'
+                });
+            }
+
+            // Add additional foremen
+            if (site.additionalForemen && site.additionalForemen.length > 0) {
+                for (const foreman of site.additionalForemen) {
+                    const pendingCount = await getPendingVerificationCount(site._id);
+                    foremenData.push({
+                        id: foreman._id,
+                        name: foreman.name,
+                        site: site.name,
+                        siteId: site._id,
+                        pendingHajiri: pendingCount,
+                        phone: foreman.phone || 'N/A'
+                    });
+                }
+            }
+        }
+
+        if (foremenData.length === 0) {
+            foremenList.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center py-4">
+                        <i class="bi bi-info-circle me-2 text-muted"></i>
+                        No foremen assigned to your sites yet.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        foremenList.innerHTML = foremenData.map(foreman => `
+            <tr>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <div class="fw-medium">${foreman.name}</div>
+                            <small class="text-muted">${foreman.phone}</small>
+                        </div>
+                    </div>
+                </td>
+                <td>${foreman.site}</td>
+                <td class="text-center">
+                    <span class="badge ${foreman.pendingHajiri > 0 ? 'bg-warning' : 'bg-success'} rounded-pill">
+                        ${foreman.pendingHajiri}
+                    </span>
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-primary" onclick="viewSiteAttendance('${foreman.siteId}', '${foreman.site}')">
+                        <i class="bi bi-check2-square me-1"></i>
+                        ${translations[currentLanguage].view}
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+
+    } catch (error) {
+        console.error('Error loading foremen list:', error);
+        foremenList.innerHTML = `
+            <tr>
+                <td colspan="4" class="text-center text-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Error loading foremen data
+                </td>
+            </tr>
+        `;
+    }
 }
 
-// Load dummy submitted hajiri
-function loadDummySubmittedHajiri() {
+// Load recent submissions
+async function loadRecentSubmissions() {
     if (!submittedHajiriTable) {
         console.warn("Submitted hajiri table element not found");
         return;
     }
-    
-    const dummyRecords = [
-        { 
-            id: '1', 
-            date: new Date(), 
-            foreman: { name: 'Rajesh Kumar' }, 
-            site: 'Delhi Site', 
-            workersPresent: 15 
-        },
-        { 
-            id: '2', 
-            date: new Date(Date.now() - 86400000), // yesterday
-            foreman: { name: 'Sunil Sharma' }, 
-            site: 'Mumbai Project', 
-            workersPresent: 12 
-        },
-        { 
-            id: '3', 
-            date: new Date(Date.now() - 86400000), // yesterday
-            foreman: { name: 'Amit Singh' }, 
-            site: 'Bangalore Construction', 
-            workersPresent: 20 
-        },
-        { 
-            id: '4', 
-            date: new Date(Date.now() - 172800000), // 2 days ago
-            foreman: { name: 'Rajesh Kumar' }, 
-            site: 'Delhi Site', 
-            workersPresent: 14 
-        },
-        { 
-            id: '5', 
-            date: new Date(Date.now() - 259200000), // 3 days ago
-            foreman: { name: 'Sunil Sharma' }, 
-            site: 'Mumbai Project', 
-            workersPresent: 10 
+
+    try {
+        // Get recent attendance records that are submitted to incharge
+        const today = new Date();
+        const lastWeek = new Date();
+        lastWeek.setDate(today.getDate() - 7);
+
+        const response = await fetch(`${API_BASE_URL}/attendance?submittedToIncharge=true&startDate=${lastWeek.toISOString().split('T')[0]}&endDate=${today.toISOString().split('T')[0]}`, {
+            headers: getAuthHeaders()
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to load recent submissions: ${response.status}`);
         }
-    ];
-    
-    submittedHajiriTable.innerHTML = dummyRecords.map(record => `
-        <tr>
-            <td>${record.date.toLocaleDateString()}</td>
-            <td>${record.foreman.name}</td>
-            <td>${record.site}</td>
-            <td>${record.workersPresent}</td>
-            <td>
-                <span class="status-badge status-approved">
-                    ${translations[currentLanguage].submitted}
-                </span>
-            </td>
-            <td>
-                <button class="btn btn-sm btn-primary" onclick="viewHajiriRecord('${record.id}')">
-                    ${translations[currentLanguage].view}
-                </button>
-            </td>
-        </tr>
-    `).join('');
+
+        // Check if response is JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('Expected JSON but received:', text.substring(0, 200));
+            throw new Error('Server returned non-JSON response');
+        }
+
+        const data = await response.json();
+        const submissions = Array.isArray(data.data?.attendance) ? data.data.attendance : Array.isArray(data.data) ? data.data : [];
+
+        if (submissions.length === 0) {
+            submittedHajiriTable.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center py-4">
+                        <i class="bi bi-info-circle me-2 text-muted"></i>
+                        No recent submissions found.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        // Group submissions by site, foreman, and date
+        const groupedSubmissions = {};
+        submissions.forEach(submission => {
+            const key = `${submission.site._id}-${submission.markedBy._id}-${submission.date}`;
+            if (!groupedSubmissions[key]) {
+                groupedSubmissions[key] = {
+                    site: submission.site,
+                    foreman: submission.markedBy,
+                    date: submission.date,
+                    submissionTime: submission.submissionTimestamp ? new Date(submission.submissionTimestamp).toLocaleString() : 'Unknown',
+                    records: []
+                };
+            }
+            // Only add present records, skip absentees
+            if (submission.status === 'present') {
+                groupedSubmissions[key].records.push(submission);
+            }
+        });
+
+        const submissionsArray = Object.values(groupedSubmissions);
+        submissionsArray.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        submittedHajiriTable.innerHTML = submissionsArray.slice(0, 5).map(submission => {
+            const allVerified = submission.records.every(record => record.verified);
+            const someVerified = submission.records.some(record => record.verified);
+
+            let statusBadge = '';
+            if (allVerified) {
+                statusBadge = `<span class="badge bg-success">${translations[currentLanguage].approved}</span>`;
+            } else if (someVerified) {
+                statusBadge = `<span class="badge bg-warning">Partially Approved</span>`;
+            } else {
+                statusBadge = `<span class="badge bg-info">Pending</span>`;
+            }
+
+            return `
+                <tr>
+                    <td>${formatDate(submission.date)}</td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            
+                            <div>
+                                <div class="fw-medium">${submission.foreman.name}</div>
+                                <small class="text-muted">${submission.submissionTime}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${submission.site.name}</td>
+                    <td class="text-center">${submission.records.length}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="viewSubmission('${submission.site._id}', '${submission.foreman._id}', '${submission.date}')">
+                            <i class="bi bi-eye me-1"></i>
+                            ${translations[currentLanguage].view}
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+    } catch (error) {
+        console.error('Error loading recent submissions:', error);
+        submittedHajiriTable.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center text-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Error loading recent submissions
+                </td>
+            </tr>
+        `;
+    }
 }
 
-// View foreman's attendance records
-function viewForeman(foremanId) {
-    alert('Viewing foreman ID: ' + foremanId + '\nThis functionality will be implemented soon.');
+// Load sites overview
+async function loadSitesOverview() {
+    const container = document.getElementById('sites-overview-container');
+    if (!container) return;
+
+    const selectedDate = document.getElementById('overview-date')?.value || new Date().toISOString().split('T')[0];
+
+    try {
+        container.innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2 mb-0">Loading sites overview...</p>
+            </div>
+        `;
+
+        const response = await fetch(`${API_BASE_URL}/sites/with-attendance?date=${selectedDate}`, {
+            headers: getAuthHeaders()
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to load sites with attendance');
+        }
+
+        const data = await response.json();
+        const sites = data.data?.sites || [];
+
+        if (sites.length === 0) {
+            container.innerHTML = `
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    No attendance records found for ${formatDate(selectedDate)}.
+                </div>
+            `;
+            return;
+        }
+
+        let html = '<div class="row">';
+
+        sites.forEach(site => {
+            const totalRecords = site.attendanceCount || 0;
+            const verifiedRecords = site.verifiedCount || 0;
+            const percentVerified = totalRecords > 0 ? Math.round((verifiedRecords / totalRecords) * 100) : 0;
+
+            // Ensure safe values for template
+            const safeSiteName = (site.name || 'Unknown Site').replace(/'/g, "\\'");
+            const safeSiteLocation = (site.location || 'Unknown Location').replace(/'/g, "\\'");
+            const safeSiteId = site._id || '';
+
+            // Get badge class based on verification percentage
+            const badgeClass = percentVerified === 100 ? 'bg-success' :
+                percentVerified > 0 ? 'bg-warning' : 'bg-secondary';
+            const borderClass = percentVerified === 100 ? 'border-success' :
+                percentVerified > 0 ? 'border-warning' : 'border-secondary';
+            const progressClass = percentVerified === 100 ? 'bg-success' : 'bg-warning';
+
+            html += `
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100 ${borderClass}">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 text-white">${safeSiteName}</h6>
+                            <span class="badge ${badgeClass}">
+                                ${percentVerified}%
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text small">
+                                <i class="bi bi-geo-alt me-1 text-muted"></i>${safeSiteLocation}
+                            </p>
+                            <p class="card-text small">
+                                <i class="bi bi-person-check me-1 text-muted"></i>
+                                ${verifiedRecords} of ${totalRecords} verified
+                            </p>
+                            <div class="progress mb-2" style="height: 6px;">
+                                <div class="progress-bar ${progressClass}" 
+                                     style="width: ${percentVerified}%"></div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary btn-sm w-100" onclick="viewSiteAttendance('${safeSiteId}', '${safeSiteName}')">
+                                <i class="bi bi-check2-square me-1"></i>Review
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += '</div>';
+        container.innerHTML = html;
+
+    } catch (error) {
+        console.error('Error loading sites overview:', error);
+        container.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                Error loading sites overview: ${error.message}
+            </div>
+        `;
+    }
 }
 
-// View specific hajiri record
-function viewHajiriRecord(recordId) {
-    alert('Viewing hajiri record ID: ' + recordId + '\nThis functionality will be implemented soon.');
+// Set default dates
+function setDefaultDates() {
+    const today = new Date().toISOString().split('T')[0];
+
+    const overviewDate = document.getElementById('overview-date');
+    const submissionDate = document.getElementById('submissionDate');
+
+    if (overviewDate) overviewDate.value = today;
+    if (submissionDate) submissionDate.value = today;
+}
+
+// Utility functions
+function showLoading(message = 'Loading...') {
+    let loadingOverlay = document.getElementById('global-loading-overlay');
+
+    if (!loadingOverlay) {
+        loadingOverlay = document.createElement('div');
+        loadingOverlay.id = 'global-loading-overlay';
+        loadingOverlay.className = 'loading-overlay';
+        loadingOverlay.innerHTML = `
+            <div class="text-center">
+                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mb-0 fw-bold">${message}</p>
+            </div>
+        `;
+        document.body.appendChild(loadingOverlay);
+    }
+
+    loadingOverlay.style.display = 'flex';
+}
+
+function hideLoading() {
+    const loadingOverlay = document.getElementById('global-loading-overlay');
+    if (loadingOverlay) {
+        loadingOverlay.style.display = 'none';
+    }
+}
+
+function showError(message) {
+    console.error(message);
+    showNotification(message, 'error');
+}
+
+function showSuccess(message) {
+    console.log(message);
+    showNotification(message, 'success');
+}
+
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info'} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = `
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        max-width: 500px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    `;
+
+    const icon = type === 'error' ? 'exclamation-triangle' :
+        type === 'success' ? 'check-circle' : 'info-circle';
+
+    notification.innerHTML = `
+        <i class="bi bi-${icon} me-2"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+    document.body.appendChild(notification);
+
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// View site attendance function
+function viewSiteAttendance(siteId, siteName) {
+    console.log('Viewing attendance for site:', siteName, siteId);
+
+    // Switch to approve hajiri section
+    switchToSection('approve-hajiri-section');
+
+    // Set the site filter if it exists
+    const siteFilter = document.getElementById('site-filter');
+    if (siteFilter) {
+        siteFilter.value = siteId;
+        // Trigger change event to load attendance for this site
+        siteFilter.dispatchEvent(new Event('change'));
+    }
+
+    showSuccess(`Switched to ${siteName} attendance review`);
+}
+
+// Switch to section
+function switchToSection(sectionId) {
+    // Hide all sections
+    document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+    });
+
+    // Show target section
+    const targetElement = document.getElementById(sectionId);
+    if (targetElement) {
+        targetElement.classList.add('active');
+
+        // Load section-specific data
+        switch (sectionId) {
+            case 'overview-section':
+                loadDashboardData();
+                break;
+            case 'approve-hajiri-section':
+                loadSubmissionsForDate();
+                break;
+            case 'submitted-hajiri-section':
+                loadRecentSubmissions();
+                break;
+        }
+    }
 }
 
 // Toggle language
@@ -327,7 +775,7 @@ function updateLanguageContent() {
         const section = link.getAttribute('data-section');
         const navText = link.querySelector('.nav-text');
         if (!navText) return;
-        
+
         if (section === 'overview-section') {
             navText.textContent = translations[currentLanguage].home;
         } else if (section === 'approve-hajiri-section') {
@@ -342,7 +790,7 @@ function updateLanguageContent() {
     // Update section titles
     document.querySelectorAll('.section h2').forEach(title => {
         if (!title.parentElement) return;
-        
+
         if (title.parentElement.id === 'overview-section') {
             title.textContent = translations[currentLanguage].home;
         } else if (title.parentElement.id === 'approve-hajiri-section') {
@@ -359,7 +807,7 @@ function updateLanguageContent() {
     if (logoutButton) {
         logoutButton.textContent = translations[currentLanguage].logout;
     }
-    
+
     // Update table headers
     updateTableHeaders();
 }
@@ -379,7 +827,7 @@ function updateTableHeaders() {
             }
         }
     }
-    
+
     // Update submitted hajiri table headers if they exist
     if (submittedHajiriTable) {
         const submittedTable = submittedHajiriTable.closest('table');
@@ -397,14 +845,7 @@ function updateTableHeaders() {
     }
 }
 
-// Load submissions for a specific date
-function loadSubmissionsForDate() {
-    const submissionDateInput = document.getElementById('submissionDate');
-    if (!submissionDateInput) return;
-    
-    const submissionDate = submissionDateInput.value;
-    alert('Loading submissions for date: ' + submissionDate + '\nThis functionality will be implemented with real API calls soon.');
-}
+// Load submissions for a specific date (removed duplicate - real implementation is below)
 
 // Logout function
 function logout() {
@@ -416,11 +857,11 @@ function logout() {
 // Format time in 12-hour format with AM/PM
 function formatTime(timeString) {
     if (!timeString || timeString === '-') return '-';
-    
+
     try {
         const date = new Date(timeString);
         if (isNaN(date.getTime())) return '-';
-        
+
         return date.toLocaleTimeString('en-US', {
             hour: '2-digit',
             minute: '2-digit',
@@ -435,11 +876,11 @@ function formatTime(timeString) {
 // Format working hours with proper decimal places
 function formatHours(hours) {
     if (!hours || hours === '-') return '-';
-    
+
     try {
         const numHours = parseFloat(hours);
         if (isNaN(numHours)) return '-';
-        
+
         return numHours.toFixed(1);
     } catch (error) {
         console.error('Error formatting hours:', error);
@@ -452,12 +893,12 @@ function formatDate(dateString) {
     try {
         const date = new Date(dateString);
         if (isNaN(date.getTime())) return '-';
-        
-        return date.toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
+
+        return date.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
         });
     } catch (error) {
         console.error('Error formatting date:', error);
@@ -470,39 +911,39 @@ async function loadSites() {
     try {
         const sitesList = document.getElementById('sitesList');
         sitesList.innerHTML = '<tr><td colspan="5" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div> Loading sites...</td></tr>';
-        
+
         const response = await fetch(`${API_URL}/sites`, {
             headers: {
                 'Authorization': getAuthHeader()
             }
         });
-        
+
         if (!response.ok) {
             throw new Error('Failed to load sites');
         }
-        
+
         const data = await response.json();
         sitesList.innerHTML = '';
-        
+
         if (data.data.sites.length === 0) {
             sitesList.innerHTML = '<tr><td colspan="5" class="text-center py-4"><i class="bi bi-exclamation-circle text-muted me-2"></i>No sites found.</td></tr>';
             return;
         }
-        
+
         // Loop through sites and add to table
         data.data.sites.forEach(async (site) => {
             const row = document.createElement('tr');
-            
+
             // Get pending verification count for each site
             const pendingCount = await getPendingVerificationCount(site._id);
-            
+
             // Format foremen list
             let foremenList = site.siteManager ? site.siteManager.name : 'No primary foreman';
             if (site.additionalForemen && site.additionalForemen.length > 0) {
                 const additionalNames = site.additionalForemen.map(f => f.name).join(', ');
                 foremenList += `, ${additionalNames}`;
             }
-            
+
             row.innerHTML = `
                 <td>${site.name}</td>
                 <td><i class="bi bi-geo-alt me-1 text-secondary"></i>${site.location}</td>
@@ -516,10 +957,10 @@ async function loadSites() {
                     </button>
                 </td>
             `;
-            
+
             sitesList.appendChild(row);
         });
-        
+
     } catch (error) {
         console.error('Error loading sites:', error);
         document.getElementById('sitesList').innerHTML = `
@@ -531,17 +972,15 @@ async function loadSites() {
 // Get pending verification count for a site
 async function getPendingVerificationCount(siteId) {
     try {
-        const response = await fetch(`${API_URL}/attendance/pending-verification?site=${siteId}`, {
-            headers: {
-                'Authorization': getAuthHeader()
-            }
+        const response = await fetch(`${API_BASE_URL}/attendance/pending-verification?site=${siteId}`, {
+            headers: getAuthHeaders()
         });
-        
+
         if (!response.ok) {
             console.error('Error fetching pending verification count');
             return 0;
         }
-        
+
         const data = await response.json();
         return data.count || 0;
     } catch (error) {
@@ -554,16 +993,16 @@ async function getPendingVerificationCount(siteId) {
 function viewSiteAttendance(siteId, siteName) {
     document.getElementById('verification-site-id').value = siteId;
     document.getElementById('verification-site-name').textContent = siteName;
-    
+
     // Get selected date or use today's date
-    const selectedDate = document.getElementById('attendanceDate').value || 
-                        new Date().toISOString().slice(0, 10);
+    const selectedDate = document.getElementById('attendanceDate').value ||
+        new Date().toISOString().slice(0, 10);
     document.getElementById('verification-date').value = selectedDate;
     document.getElementById('display-verification-date').textContent = formatDate(selectedDate);
-    
+
     // Load attendance records for the site and date
     loadAttendanceForVerification(siteId, selectedDate);
-    
+
     // Show the modal
     const modal = new bootstrap.Modal(document.getElementById('verificationModal'));
     modal.show();
@@ -574,56 +1013,56 @@ async function loadAttendanceForVerification(siteId, date) {
     try {
         const verificationList = document.getElementById('verificationList');
         verificationList.innerHTML = '<tr><td colspan="7" class="text-center"><div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div> Loading attendance records...</td></tr>';
-        
+
         const response = await fetch(`${API_URL}/attendance?site=${siteId}&date=${date}`, {
             headers: {
                 'Authorization': getAuthHeader()
             }
         });
-        
+
         if (!response.ok) {
             throw new Error('Failed to load attendance records');
         }
-        
+
         const data = await response.json();
         verificationList.innerHTML = '';
-        
+
         if (!data.data || !data.data.attendance || data.data.attendance.length === 0) {
             verificationList.innerHTML = '<tr><td colspan="7" class="text-center">No attendance records found for this date.</td></tr>';
             return;
         }
-        
+
         // Get submission details
         let submissionTime = '-';
         let globalInTime = '-';
         let globalOutTime = '-';
-        
+
         // Check if any record has submission details
         const firstRecord = data.data.attendance[0];
         if (firstRecord.submissionTimestamp) {
-            submissionTime = formatDate(firstRecord.submissionTimestamp) + ' at ' + 
+            submissionTime = formatDate(firstRecord.submissionTimestamp) + ' at ' +
                 formatTime(firstRecord.submissionTimestamp);
         }
-        
+
         if (firstRecord.globalInTime) {
             globalInTime = formatTime(firstRecord.globalInTime);
         }
-        
+
         if (firstRecord.globalOutTime) {
             globalOutTime = formatTime(firstRecord.globalOutTime);
         }
-        
+
         // Show foreman name who recorded the attendance
         if (firstRecord.markedBy) {
-            document.getElementById('display-foreman-name').textContent = 
+            document.getElementById('display-foreman-name').textContent =
                 firstRecord.markedBy.name || 'Unknown';
         } else {
             document.getElementById('display-foreman-name').textContent = 'Unknown';
         }
-        
+
         // Add submission details to modal
         const modalBody = document.querySelector('#verificationModal .modal-body');
-        
+
         // Check if submission details section already exists
         let submissionDetails = document.getElementById('submission-details');
         if (!submissionDetails) {
@@ -632,7 +1071,7 @@ async function loadAttendanceForVerification(siteId, date) {
             submissionDetails.className = 'submission-details mb-4 p-3 bg-light rounded';
             modalBody.insertBefore(submissionDetails, modalBody.firstChild.nextSibling);
         }
-        
+
         submissionDetails.innerHTML = `
             <h6 class="mb-3"><i class="bi bi-info-circle me-2"></i>Submission Details</h6>
             <div class="row">
@@ -650,13 +1089,13 @@ async function loadAttendanceForVerification(siteId, date) {
                 </div>
             </div>
         `;
-        
+
         // Add attendance records to table
         data.data.attendance.forEach((record, index) => {
             const timeIn = record.inTime ? formatTime(record.inTime) : '-';
             const timeOut = record.outTime ? formatTime(record.outTime) : '-';
             const hours = formatHours(record.workingHours) || '-';
-            
+
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${index + 1}</td>
@@ -677,14 +1116,14 @@ async function loadAttendanceForVerification(siteId, date) {
                     </div>
                 </td>
             `;
-            
+
             if (record.verified) {
                 row.classList.add('table-success', 'opacity-75');
             }
-            
+
             verificationList.appendChild(row);
         });
-        
+
     } catch (error) {
         console.error('Error loading attendance for verification:', error);
         document.getElementById('verificationList').innerHTML = `
@@ -700,23 +1139,23 @@ async function loadAttendanceForDate() {
         alert('Please select a date');
         return;
     }
-    
+
     try {
         const container = document.getElementById('attendanceVerificationContainer');
         container.innerHTML = '<div class="d-flex justify-content-center p-5"><div class="spinner-border text-primary" role="status"></div></div>';
-        
-        const response = await fetch(`${API_URL}/sites/with-attendance?date=${selectedDate}`, {
+
+        const response = await fetch(`${API_URL}/attendance/sites-with-attendance?date=${selectedDate}`, {
             headers: {
                 'Authorization': getAuthHeader()
             }
         });
-        
+
         if (!response.ok) {
             throw new Error('Failed to load attendance data');
         }
-        
+
         const data = await response.json();
-        
+
         if (!data.data || data.data.sites.length === 0) {
             container.innerHTML = `
                 <div class="alert alert-info">
@@ -726,7 +1165,7 @@ async function loadAttendanceForDate() {
             `;
             return;
         }
-        
+
         let html = `
             <div class="row mb-4">
                 <div class="col-12">
@@ -738,13 +1177,13 @@ async function loadAttendanceForDate() {
             </div>
             <div class="row">
         `;
-        
+
         data.data.sites.forEach(site => {
             // Count verified and total records
             const totalRecords = site.attendanceCount || 0;
             const verifiedRecords = site.verifiedCount || 0;
             const percentVerified = totalRecords > 0 ? Math.round((verifiedRecords / totalRecords) * 100) : 0;
-            
+
             // Get submission timestamp if available
             let submissionBadge = '';
             if (site.submissionTimestamp) {
@@ -758,7 +1197,7 @@ async function loadAttendanceForDate() {
                     </div>
                 `;
             }
-            
+
             html += `
                 <div class="col-md-6 col-lg-4 mb-4">
                     <div class="card h-100 ${percentVerified === 100 ? 'border-success' : percentVerified > 0 ? 'border-warning' : ''}">
@@ -796,10 +1235,10 @@ async function loadAttendanceForDate() {
                 </div>
             `;
         });
-        
+
         html += '</div>';
         container.innerHTML = html;
-        
+
     } catch (error) {
         console.error('Error loading attendance for date:', error);
         document.getElementById('attendanceVerificationContainer').innerHTML = `
@@ -817,23 +1256,23 @@ async function verifyAllAttendance() {
         const siteId = document.getElementById('verification-site-id').value;
         const date = document.getElementById('verification-date').value;
         const note = document.getElementById('verification-note').value;
-        
+
         // Get all checked checkboxes
         const checkedBoxes = document.querySelectorAll('.verification-checkbox:checked:not(:disabled)');
-        
+
         if (checkedBoxes.length === 0) {
             alert('Please select at least one attendance record to verify');
             return;
         }
-        
+
         // Disable verify button and show loading state
         const verifyBtn = document.getElementById('verifyAllBtn');
         const originalText = verifyBtn.innerHTML;
         verifyBtn.disabled = true;
         verifyBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Verifying...';
-        
+
         const attendanceIds = Array.from(checkedBoxes).map(checkbox => checkbox.value);
-        
+
         const response = await fetch(`${API_URL}/attendance/verify`, {
             method: 'POST',
             headers: {
@@ -847,20 +1286,20 @@ async function verifyAllAttendance() {
                 date
             })
         });
-        
+
         if (!response.ok) {
             throw new Error('Failed to verify attendance');
         }
-        
+
         // Hide modal
         bootstrap.Modal.getInstance(document.getElementById('verificationModal')).hide();
-        
+
         // Show success message with toast
         showToast('Success', `${attendanceIds.length} attendance records verified successfully.`, 'success');
-        
+
         // Reload sites to update counts
         loadSites();
-        
+
     } catch (error) {
         console.error('Error verifying attendance:', error);
         showToast('Error', error.message, 'danger');
@@ -877,28 +1316,28 @@ async function rejectAllAttendance() {
     if (!confirm('Are you sure you want to reject these attendance records? This will require the foreman to resubmit them.')) {
         return;
     }
-    
+
     try {
         const siteId = document.getElementById('verification-site-id').value;
         const date = document.getElementById('verification-date').value;
         const note = document.getElementById('verification-note').value || 'Rejected by site incharge';
-        
+
         // Get all selected checkboxes
         const checkedBoxes = document.querySelectorAll('.verification-checkbox:checked:not(:disabled)');
-        
+
         if (checkedBoxes.length === 0) {
             alert('Please select at least one attendance record to reject');
             return;
         }
-        
+
         // Disable reject button and show loading state
         const rejectBtn = document.getElementById('rejectBtn');
         const originalText = rejectBtn.innerHTML;
         rejectBtn.disabled = true;
         rejectBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Rejecting...';
-        
+
         const attendanceIds = Array.from(checkedBoxes).map(checkbox => checkbox.value);
-        
+
         const response = await fetch(`${API_URL}/attendance/reject`, {
             method: 'POST',
             headers: {
@@ -912,20 +1351,20 @@ async function rejectAllAttendance() {
                 date
             })
         });
-        
+
         if (!response.ok) {
             throw new Error('Failed to reject attendance');
         }
-        
+
         // Hide modal
         bootstrap.Modal.getInstance(document.getElementById('verificationModal')).hide();
-        
+
         // Show success message with toast
         showToast('Success', `${attendanceIds.length} attendance records rejected successfully.`, 'warning');
-        
+
         // Reload sites to update counts
         loadSites();
-        
+
     } catch (error) {
         console.error('Error rejecting attendance:', error);
         showToast('Error', error.message, 'danger');
@@ -948,7 +1387,7 @@ function showToast(title, message, type = 'info') {
         toastContainer.style.zIndex = '5';
         document.body.appendChild(toastContainer);
     }
-    
+
     // Create toast element
     const toastId = 'toast-' + Date.now();
     const toastEl = document.createElement('div');
@@ -957,7 +1396,7 @@ function showToast(title, message, type = 'info') {
     toastEl.setAttribute('role', 'alert');
     toastEl.setAttribute('aria-live', 'assertive');
     toastEl.setAttribute('aria-atomic', 'true');
-    
+
     toastEl.innerHTML = `
         <div class="d-flex">
             <div class="toast-body">
@@ -966,18 +1405,18 @@ function showToast(title, message, type = 'info') {
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
     `;
-    
+
     toastContainer.appendChild(toastEl);
-    
+
     // Initialize and show toast
     const toast = new bootstrap.Toast(toastEl, {
         autohide: true,
         delay: 5000
     });
     toast.show();
-    
+
     // Remove toast from DOM after it's hidden
-    toastEl.addEventListener('hidden.bs.toast', function() {
+    toastEl.addEventListener('hidden.bs.toast', function () {
         toastEl.remove();
     });
 }
@@ -1016,19 +1455,35 @@ async function loadSubmissionsForDate() {
         `;
 
         // Fetch attendance submissions for the selected date
-        const response = await fetch(`${API_URL}/attendance/submissions?date=${date}`, {
+        const authHeader = getAuthHeader();
+        if (!authHeader) {
+            throw new Error('Authentication required. Please log in again.');
+        }
+        console.log("Incharge API call:", `${API_URL}/attendance?date=${date}&submittedToIncharge=true`);
+
+        const response = await fetch(`${API_URL}/attendance?date=${date}&submittedToIncharge=true`, {
             headers: {
-                'Authorization': getAuthHeader()
+                'Authorization': authHeader,
+                'Content-Type': 'application/json'
             }
         });
 
         if (!response.ok) {
-            throw new Error('Failed to load submissions');
+            throw new Error(`Failed to load submissions: ${response.status}`);
+        }
+
+        // Check if response is JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('Expected JSON but received:', text.substring(0, 200));
+            throw new Error('Server returned non-JSON response');
         }
 
         const data = await response.json();
-        
-        if (!data.data || data.data.length === 0) {
+        const submissions = Array.isArray(data.data?.attendance) ? data.data.attendance : Array.isArray(data.data) ? data.data : [];
+
+        if (submissions.length === 0) {
             submissionsList.innerHTML = `
                 <tr>
                     <td colspan="7" class="text-center py-4">
@@ -1042,39 +1497,42 @@ async function loadSubmissionsForDate() {
 
         // Group submissions by site and foreman
         const groupedSubmissions = {};
-        data.data.forEach(submission => {
+        submissions.forEach(submission => {
             const key = `${submission.site._id}-${submission.markedBy._id}`;
             if (!groupedSubmissions[key]) {
                 groupedSubmissions[key] = {
                     site: submission.site,
                     foreman: submission.markedBy,
                     date: submission.date,
-                    submissionTime: submission.submissionTime || 'Unknown',
+                    submissionTime: submission.submissionTimestamp ? new Date(submission.submissionTimestamp).toLocaleString() : 'Unknown',
                     submissionDate: submission.submissionDate || formatDate(submission.date),
                     records: []
                 };
             }
-            groupedSubmissions[key].records.push(submission);
+            // Only add present records, skip absentees
+            if (submission.status === 'present') {
+                groupedSubmissions[key].records.push(submission);
+            }
         });
 
         // Clear and populate the submissions list
         submissionsList.innerHTML = '';
-        
+
         // Convert grouped submissions to array and sort by submission time
         const submissionsArray = Object.values(groupedSubmissions);
         submissionsArray.sort((a, b) => {
-            return new Date(b.submissionDate + ' ' + b.submissionTime) - 
-                   new Date(a.submissionDate + ' ' + a.submissionTime);
+            return new Date(b.submissionDate + ' ' + b.submissionTime) -
+                new Date(a.submissionDate + ' ' + a.submissionTime);
         });
 
         submissionsArray.forEach(submission => {
             const row = document.createElement('tr');
-            
+
             // Determine status badge
             let statusBadge = '';
             const allVerified = submission.records.every(record => record.verified);
             const someVerified = submission.records.some(record => record.verified);
-            
+
             if (allVerified) {
                 statusBadge = '<span class="badge bg-success">Approved</span>';
             } else if (someVerified) {
@@ -1082,16 +1540,13 @@ async function loadSubmissionsForDate() {
             } else {
                 statusBadge = '<span class="badge bg-info">Pending</span>';
             }
-            
+
             row.innerHTML = `
                 <td>
                     <div class="d-flex align-items-center">
-                        <div class="avatar avatar-sm me-2 bg-primary-subtle rounded-circle">
-                            <span class="avatar-text">${submission.foreman.name.charAt(0)}</span>
-                        </div>
+
                         <div>
                             <div class="fw-medium">${submission.foreman.name}</div>
-                            <div class="small text-muted">${submission.foreman.phone || 'No phone'}</div>
                         </div>
                     </div>
                 </td>
@@ -1106,7 +1561,7 @@ async function loadSubmissionsForDate() {
                     </button>
                 </td>
             `;
-            
+
             submissionsList.appendChild(row);
         });
     } catch (error) {
@@ -1136,25 +1591,26 @@ async function viewSubmission(siteId, foremanId, date) {
                 </td>
             </tr>
         `;
-        
+
         // Show the modal
         const modal = new bootstrap.Modal(document.getElementById('approveSubmissionModal'));
         modal.show();
-        
+
         // Fetch submission details
         const response = await fetch(`${API_URL}/attendance?site=${siteId}&date=${date}&markedBy=${foremanId}`, {
             headers: {
                 'Authorization': getAuthHeader()
             }
         });
-        
+
         if (!response.ok) {
             throw new Error('Failed to load submission details');
         }
-        
+
         const data = await response.json();
-        
-        if (!data.data || data.data.length === 0) {
+        const records = Array.isArray(data.data?.attendance) ? data.data.attendance : Array.isArray(data.data) ? data.data : [];
+
+        if (!records || records.length === 0) {
             document.getElementById('submission-attendance-table').innerHTML = `
                 <tr>
                     <td colspan="7" class="text-center">
@@ -1165,49 +1621,52 @@ async function viewSubmission(siteId, foremanId, date) {
             `;
             return;
         }
-        
+
         // Set submission metadata
-        const records = Array.isArray(data.data) ? data.data : [];
         const firstRecord = records[0];
-        
+
         document.getElementById('submission-id').value = `${siteId}-${foremanId}-${date}`;
         document.getElementById('submission-foreman').textContent = firstRecord.markedBy ? firstRecord.markedBy.name : 'Unknown';
         document.getElementById('submission-site').textContent = firstRecord.site ? firstRecord.site.name : 'Unknown';
         document.getElementById('submission-date').textContent = formatDate(date);
-        document.getElementById('submission-time').textContent = firstRecord.submissionTime || 'Unknown';
-        
-        // Populate attendance table
+
+        // Set in time and out time from the first present record
+        const firstPresentRecord = records.find(r => r.status === 'present');
+        document.getElementById('submission-in-time').textContent = firstPresentRecord && firstPresentRecord.inTime ?
+            formatTime(firstPresentRecord.inTime) : '-';
+        document.getElementById('submission-out-time').textContent = firstPresentRecord && firstPresentRecord.outTime ?
+            formatTime(firstPresentRecord.outTime) : '-';
+
+        // Populate attendance table - only show present workers
         const tbody = document.getElementById('submission-attendance-table');
         tbody.innerHTML = '';
-        
-        records.forEach((record, index) => {
+
+        // Filter to only present workers
+        const presentRecords = records.filter(record => record.status === 'present');
+
+        presentRecords.forEach((record, index) => {
             const worker = record.worker || { name: 'Unknown', fatherName: 'Unknown' };
-            const isPresent = record.status === 'present' || record.hajiriPA === 'P';
             const hajiriX = record.hajiriX || '0';
             const hajiriY = record.hajiriY || '0';
-            const workingHours = (parseInt(hajiriX) || 0) * 8 + (parseInt(hajiriY) || 0);
-            
+            const workingHours = (hajiriX * 8) + hajiriY;
+
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${index + 1}</td>
                 <td>${worker.name}</td>
                 <td>${worker.fatherName || 'N/A'}</td>
                 <td>
-                    <span class="badge ${isPresent ? 'bg-success' : 'bg-danger'}">
-                        ${isPresent ? 'P' : 'A'}
-                    </span>
+                    <span class="badge bg-success">P</span>
                 </td>
-                <td>
-                    ${isPresent ? `${hajiriX}P${hajiriY}` : '-'}
-                </td>
-                <td>${isPresent ? workingHours : '0'}</td>
+                <td>${hajiriX}P${hajiriY}</td>
+                <td>${workingHours}</td>
                 <td>
                     <button class="btn btn-sm btn-outline-primary" onclick="editAttendanceRecord('${record._id}')">
                         <i class="bi bi-pencil"></i>
                     </button>
                 </td>
             `;
-            
+
             tbody.appendChild(tr);
         });
     } catch (error) {
@@ -1229,42 +1688,42 @@ async function editAttendanceRecord(recordId) {
         // Show loading state
         const editModal = new bootstrap.Modal(document.getElementById('editAttendanceModal'));
         editModal.show();
-        
+
         // Fetch record details
         const response = await fetch(`${API_URL}/attendance/${recordId}`, {
             headers: {
                 'Authorization': getAuthHeader()
             }
         });
-        
+
         if (!response.ok) {
             throw new Error('Failed to load attendance record');
         }
-        
+
         const data = await response.json();
-        
+
         if (!data.data) {
             showToast('Error', 'Failed to load attendance record', 'error');
             return;
         }
-        
+
         const record = data.data;
         const worker = record.worker || { name: 'Unknown' };
-        
+
         // Populate form
         document.getElementById('edit-attendance-id').value = record._id;
         document.getElementById('edit-worker-id').value = worker._id;
         document.getElementById('edit-worker-name').value = worker.name;
-        
+
         // Set status
         const isPresent = record.status === 'present' || record.hajiriPA === 'P';
         document.getElementById('edit-status-present').checked = isPresent;
         document.getElementById('edit-status-absent').checked = !isPresent;
-        
+
         // Set hajiri values
         document.getElementById('edit-hajiri-x').value = record.hajiriX || '0';
         document.getElementById('edit-hajiri-y').value = record.hajiriY || '0';
-        
+
         // Calculate working hours
         updateWorkingHours();
     } catch (error) {
@@ -1278,58 +1737,80 @@ function updateWorkingHours() {
     const hajiriX = parseInt(document.getElementById('edit-hajiri-x').value) || 0;
     const hajiriY = parseInt(document.getElementById('edit-hajiri-y').value) || 0;
     const workingHours = (hajiriX * 8) + hajiriY;
-    
+
     document.getElementById('edit-working-hours').value = workingHours;
 }
 
 // Save attendance edit
-async function saveAttendanceEdit() {
+// Save attendance edit with hajiri values
+async function saveAttendanceEditWithHajiri() {
     try {
         const recordId = document.getElementById('edit-attendance-id').value;
         const status = document.getElementById('edit-status-present').checked ? 'present' : 'absent';
-        const hajiriPA = status === 'present' ? 'P' : 'A';
-        const hajiriX = document.getElementById('edit-hajiri-x').value;
-        const hajiriY = document.getElementById('edit-hajiri-y').value;
-        const workingHours = document.getElementById('edit-working-hours').value;
-        
+        const hajiriX = parseInt(document.getElementById('edit-hajiri-x').value) || 0;
+        const hajiriY = parseInt(document.getElementById('edit-hajiri-y').value) || 0;
+
+        // Validate hajiri values
+        if (hajiriX < 0 || hajiriX > 1 || hajiriY < 0 || hajiriY > 1) {
+            showNotification('Hajiri values must be 0 or 1', 'error');
+            return;
+        }
+
+        // Show loading state
+        const saveBtn = document.querySelector('#editAttendanceModal .btn-primary');
+        const originalText = saveBtn.innerHTML;
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Saving...';
+
         // Prepare data
         const updateData = {
             status,
-            hajiriPA,
             hajiriX,
-            hajiriY,
-            workingHours: parseInt(workingHours),
-            modifiedBy: JSON.parse(localStorage.getItem('user'))._id,
-            modifiedAt: new Date().toISOString()
+            hajiriY
         };
-        
+
         // Update record
-        const response = await fetch(`${API_URL}/attendance/${recordId}`, {
+        const response = await fetch(`${API_BASE_URL}/attendance/${recordId}`, {
             method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': getAuthHeader()
-            },
+            headers: getAuthHeaders(),
             body: JSON.stringify(updateData)
         });
-        
+
         if (!response.ok) {
-            throw new Error('Failed to update attendance record');
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to update attendance record');
         }
-        
+
+        const result = await response.json();
+
         // Close modal
-        bootstrap.Modal.getInstance(document.getElementById('editAttendanceModal')).hide();
-        
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editAttendanceModal'));
+        if (modal) modal.hide();
+
         // Refresh submission view
         const submissionId = document.getElementById('submission-id').value;
-        const [siteId, foremanId, date] = submissionId.split('-');
-        await viewSubmission(siteId, foremanId, date);
-        
-        showToast('Success', 'Attendance record updated successfully', 'success');
+        if (submissionId) {
+            const [siteId, foremanId, date] = submissionId.split('-');
+            await viewSubmission(siteId, foremanId, date);
+        }
+
+        showNotification('Attendance record updated successfully', 'success');
     } catch (error) {
         console.error('Error updating attendance record:', error);
-        showToast('Error', `Failed to update attendance record: ${error.message}`, 'error');
+        showNotification(`Failed to update attendance record: ${error.message}`, 'error');
+    } finally {
+        // Reset button state
+        const saveBtn = document.querySelector('#editAttendanceModal .btn-primary');
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Save Changes';
+        }
     }
+}
+
+// Legacy function for backward compatibility
+async function saveAttendanceEdit() {
+    return await saveAttendanceEditWithHajiri();
 }
 
 // Approve submission
@@ -1338,30 +1819,30 @@ async function approveSubmission() {
         const submissionId = document.getElementById('submission-id').value;
         const [siteId, foremanId, date] = submissionId.split('-');
         const comments = document.getElementById('approval-comments').value;
-        
+
         // Show loading state
         const approveBtn = document.querySelector('#approveSubmissionModal .btn-success');
         approveBtn.disabled = true;
         approveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Approving...';
-        
+
         // Fetch all records for this submission
         const response = await fetch(`${API_URL}/attendance?site=${siteId}&date=${date}&markedBy=${foremanId}`, {
             headers: {
                 'Authorization': getAuthHeader()
             }
         });
-        
+
         if (!response.ok) {
             throw new Error('Failed to load attendance records');
         }
-        
+
         const data = await response.json();
         const records = Array.isArray(data.data) ? data.data : [];
-        
+
         if (records.length === 0) {
             throw new Error('No attendance records found');
         }
-        
+
         // Update all records
         const updatePromises = records.map(record => {
             const updateData = {
@@ -1370,7 +1851,7 @@ async function approveSubmission() {
                 verifiedAt: new Date().toISOString(),
                 verificationComments: comments
             };
-            
+
             return fetch(`${API_URL}/attendance/${record._id}`, {
                 method: 'PATCH',
                 headers: {
@@ -1380,15 +1861,15 @@ async function approveSubmission() {
                 body: JSON.stringify(updateData)
             });
         });
-        
+
         await Promise.all(updatePromises);
-        
+
         // Close modal
         bootstrap.Modal.getInstance(document.getElementById('approveSubmissionModal')).hide();
-        
+
         // Refresh submissions list
         loadSubmissionsForDate();
-        
+
         showToast('Success', 'Attendance submission approved successfully', 'success');
     } catch (error) {
         console.error('Error approving submission:', error);
@@ -1401,81 +1882,7 @@ async function approveSubmission() {
     }
 }
 
-// Reject submission
-async function rejectSubmission() {
-    try {
-        const submissionId = document.getElementById('submission-id').value;
-        const [siteId, foremanId, date] = submissionId.split('-');
-        const comments = document.getElementById('approval-comments').value;
-        
-        if (!comments) {
-            showToast('Warning', 'Please add comments explaining why the submission is being returned', 'warning');
-            document.getElementById('approval-comments').focus();
-            return;
-        }
-        
-        // Show loading state
-        const rejectBtn = document.querySelector('#approveSubmissionModal .btn-warning');
-        rejectBtn.disabled = true;
-        rejectBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Returning...';
-        
-        // Fetch all records for this submission
-        const response = await fetch(`${API_URL}/attendance?site=${siteId}&date=${date}&markedBy=${foremanId}`, {
-            headers: {
-                'Authorization': getAuthHeader()
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to load attendance records');
-        }
-        
-        const data = await response.json();
-        const records = Array.isArray(data.data) ? data.data : [];
-        
-        if (records.length === 0) {
-            throw new Error('No attendance records found');
-        }
-        
-        // Update all records
-        const updatePromises = records.map(record => {
-            const updateData = {
-                verified: false,
-                submittedToIncharge: false, // Reset submission status
-                rejectedBy: JSON.parse(localStorage.getItem('user'))._id,
-                rejectedAt: new Date().toISOString(),
-                rejectionComments: comments
-            };
-            
-            return fetch(`${API_URL}/attendance/${record._id}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': getAuthHeader()
-                },
-                body: JSON.stringify(updateData)
-            });
-        });
-        
-        await Promise.all(updatePromises);
-        
-        // Close modal
-        bootstrap.Modal.getInstance(document.getElementById('approveSubmissionModal')).hide();
-        
-        // Refresh submissions list
-        loadSubmissionsForDate();
-        
-        showToast('Success', 'Attendance submission returned to foreman for corrections', 'success');
-    } catch (error) {
-        console.error('Error rejecting submission:', error);
-        showToast('Error', `Failed to return submission: ${error.message}`, 'error');
-    } finally {
-        // Reset button state
-        const rejectBtn = document.querySelector('#approveSubmissionModal .btn-warning');
-        rejectBtn.disabled = false;
-        rejectBtn.innerHTML = '<i class="bi bi-arrow-return-left me-1"></i> Return to Foreman';
-    }
-}
+// Reject submission function removed - only approve or close options available
 
 // Initialize page
 async function initializePage() {
@@ -1512,10 +1919,10 @@ async function loadForemen() {
         const response = await fetch('/api/incharge/foremen');
         if (!response.ok) throw new Error('Failed to fetch foremen');
         const data = await response.json();
-        
+
         totalForemen.textContent = data.length;
         let pendingCount = 0;
-        
+
         foremenList.innerHTML = data.map(foreman => {
             pendingCount += foreman.pendingHajiri || 0;
             return `
@@ -1531,7 +1938,7 @@ async function loadForemen() {
                 </tr>
             `;
         }).join('');
-        
+
         pendingApprovals.textContent = pendingCount;
     } catch (error) {
         console.error('Error loading foremen:', error);
@@ -1545,13 +1952,13 @@ async function loadApprovedHajiri() {
         const response = await fetch('/api/incharge/approved-hajiri?limit=5');
         if (!response.ok) throw new Error('Failed to fetch approved hajiri');
         const data = await response.json();
-        
+
         const submittedHajiriTable = document.getElementById('submitted-hajiri-table');
         if (!submittedHajiriTable) {
             console.error('Submitted hajiri table not found in the DOM');
             return;
         }
-        
+
         submittedHajiriTable.innerHTML = data.map(record => `
             <tr>
                 <td>${new Date(record.date).toLocaleDateString()}</td>
@@ -1663,17 +2070,17 @@ function setupEventListeners() {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const targetSection = link.getAttribute('data-section');
-            
+
             // Update active states
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             link.classList.add('active');
-            
+
             // Show target section
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.remove('active');
             });
             document.getElementById(targetSection).classList.add('active');
-            
+
             // Close mobile menu if open
             if (window.innerWidth <= 768) {
                 sidebar.classList.remove('active');
@@ -1682,3 +2089,6 @@ function setupEventListeners() {
         });
     });
 } 
+
+// Removed custom dial interface code - using standard modal form instead
+  
